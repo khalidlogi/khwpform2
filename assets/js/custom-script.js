@@ -29,7 +29,8 @@ jQuery(document).ready(function ($) {
           .html('<i class="fa fa-spinner fa-spin"></i> Saving...');
       },
       success: function (response) {
-        console.log("response from PHP:", response.data);
+        //alert(response.data.fields);
+        console.log("response from PHP:", response);
         if (response.success) {
           // You can access the 'data-id' value here
 
@@ -49,7 +50,7 @@ jQuery(document).ready(function ($) {
       },
       error: function (xhr, status, error) {
         // Handle AJAX error
-        console.log("AJAX error:", error);
+        console.log("AJAX error:", error, xhr, status);
       },
       complete: function () {
         // Re-enable the button after the AJAX request is completed
@@ -78,6 +79,8 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         console.log(response);
         if (response.success) {
+          $("button.update-btn").attr("data-id", "2");
+
           var fields = response.data.fields;
 
           // Clear existing inputs
@@ -144,12 +147,14 @@ jQuery(document).ready(function ($) {
 
   $(".delete-btn").on("click", function () {
     var form_id = $(this).data("form-id");
+    var id = $(this).data("form-id");
 
     if (confirm("Are you sure you want to delete this?")) {
       $("#delete-button").attr("href", "query.php?ACTION=delete&ID='1'");
       var data = {
         action: "delete_form_row",
         form_id: form_id,
+        id: id,
       };
 
       $.post(custom_vars.ajax_url, data, function (response) {

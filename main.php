@@ -199,13 +199,26 @@ if (!class_exists('KHMYCLASS')) {
 
             wp_send_json_success($keys); */
 
-            $status = $wpdb->update($table_name, array('form_value' => serialize($fields)), array('id' => $id));
-            if ($status) {
-                wp_send_json_success($fields);
+            $status = $wpdb->update(
+                $table_name,
+                array('form_value' => serialize($fields)),
+                array('id' => $id)
+            );
 
+            if ($status === false) {
+                // An error occurred, send an error response
+                $error_message = $wpdb->last_error;
+                wp_send_json_error(array('message' => $error_message));
             } else {
-                wp_send_json_error($wpdb->last_error);
+                // Update was successful, send a success response
+                wp_send_json_success(array('message' => 'Update successful!', 'fields from update' => $fields));
             }
+
+            $last_query = $wpdb->last_query;
+            error_log($last_query);
+
+            var_dump($status);
+            error_log(print_r($fields, true));
 
 
 
@@ -284,13 +297,13 @@ if (!class_exists('KHMYCLASS')) {
         {
             global $wpdb;
 
-            $form_id = $_POST['form_id'];
+            $id = $_POST['form_id'];
 
             // Define your table name
             $table_name = $wpdb->prefix . 'wpforms_db2';
 
             // Delete the row with the specified form_id
-            $wpdb->delete($table_name, array('form_id' => $form_id));
+            $wpdb->delete($table_name, array('id' => $id));
 
             wp_die(); // This is required to terminate immediately and return a proper response
         }
@@ -327,9 +340,8 @@ if (!class_exists('KHMYCLASS')) {
 
             <!-- Add this button to your HTML where you want the update button to appear -->
 
-        </form> <button type=" submit" data-form-id="<?php echo esc_attr($form_id); ?>"
-            data-id="<?php echo esc_attr($id); ?>""
-                        class=" update-btn">Save</button>
+        </form> <button type=" submit" data-form-id="<?php echo esc_attr($form_id); ?>" data-id="0"
+            class="update-btn">Save</button>
     </div>
 </div>
 
@@ -369,7 +381,7 @@ if (!class_exists('KHMYCLASS')) {
 
 
                     echo '<div class="form-set-container" data-id="' . esc_attr($id) . '">';
-                    echo '<button class="delete-btn" data-form-id="' . esc_attr($form_id) . '"><i class="fas fa-trash"></i></button>';
+                    echo '<button class="delete-btn" data-form-id="' . esc_attr($id) . '"><i class="fas fa-trash"></i></button>';
                     //echo '<button class="edit-btn" data-form-id="' . esc_attr($form_id) . '"><i class="fas fa-edit"></i></button>';
                     echo '<button class="edit-btn"  data-form-id="' . esc_attr($form_id) . '" data-id="' . esc_attr($id) . '"><i class="fas fa-edit"></i></button>';
 
