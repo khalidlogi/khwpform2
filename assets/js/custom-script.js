@@ -87,6 +87,14 @@ jQuery(document).ready(function ($) {
             `<label  id='myid' data-id='${id}'>${id}</label>`
           );
 
+          /*var button = $("<button>", {
+            type: "submit",
+            "data-id": id,
+            class: "update-btn",
+            text: "Save",
+          });
+          $("#edit-form").append(button); // Replace 'containerId' with your container's ID
+*/
           // Populate inputs with fetched fields
           $.each(fields, function (index, field) {
             var input = $("<input>", {
@@ -98,6 +106,9 @@ jQuery(document).ready(function ($) {
               placeholder: field.name,
             });
             $("#edit-form").append(input);
+
+            // submit edited fields button
+            // Create the button element with attributes
             // bt.appendTo("#edit-form");
             $("#update-btn").html('<i class="fas fa-check"></i> Checked');
             $(this).html('<i class="fas fa-check"></i> Checked');
