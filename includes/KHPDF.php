@@ -19,46 +19,10 @@ if (!class_exists('KHPDF')) {
             //$this->export_form_data();
         }
 
-        public function retrieve_form_values2()
-        {
-            global $wpdb;
-
-            $table_name = $wpdb->prefix . 'wpforms_db2';
-
-            // Retrieve the 'form_value' column from the database
-            $results = $wpdb->get_results("SELECT id,form_id, form_value FROM $table_name");
-            if ($results) {
-                error_log('get_results working');
-            } else {
-                error_log($wpdb->last_error);
-            }
-
-            $form_values = array();
-
-            foreach ($results as $result) {
-                $serialized_data = $result->form_value;
-                $form_id = $result->form_id;
-                $id = $result->id;
-
-
-                // Unserialize the serialized form value
-                $unserialized_data = unserialize($serialized_data);
-
-                $form_values[] = array(
-                    'form_id' => $form_id,
-                    'data' => $unserialized_data,
-                    'id' => $id,
-
-                );
-            }
-
-            return $form_values;
-        }
 
         public function export_form_data_pdf()
         {
             global $wpdb;
-            $date = date('Y-m-d H:i:s');
             // Create an instance of KHdb
             $khdb = new KHdb();
 
@@ -66,16 +30,10 @@ if (!class_exists('KHPDF')) {
             $datecsv = $khdb->getDate();
 
             // Retrieve the form values from the database
-            $form_values = $this->retrieve_form_values2();
+            $form_values = $khdb->retrieve_form_values2();
             $prev_id = null; // Track previous ID
             // Start building the HTML table
-            ?>
-<style>
-.same-id-row {
-    border-bottom: 5px solid #ccc;
-}
-</style>
-<?php
+
             $html_table = '<table style="margin-bottom:10px; width:100%; border-collapse:collapse; border:1px solid #ccc; font-family: Arial, sans-serif; font-size: 14px;">';
             $html_table .= '<thead>
     
@@ -119,6 +77,11 @@ if (!class_exists('KHPDF')) {
             </table>';
             $html_table .= "$datecsv";
 
+
+            // Set the response headers for downloading
+            header('Content-Type: text/html');
+            header('Content-Disposition: attachment; filename="form_data_table.html"');
+
             // Output the PDF table
             $mpdf = new \Mpdf\Mpdf();
             $mpdf->WriteHTML($html_table);
@@ -126,9 +89,8 @@ if (!class_exists('KHPDF')) {
 
             // Set HTTP headers to force download
             header('Content-Type: application/pdf');
-            header("Content-Disposition: attachment; filename='{$date}.pdf");
-            $mpdf->SetTitle(" $datecsv");
-            $mpdf->Output('filename.pdf');
+            header('Content-Disposition: attachment; filename="your_file_name.pdf"');
+            $mpdf->Output();
             //echo $html_table;
 
             wp_die(); // This is required to terminate immediately and return a proper response

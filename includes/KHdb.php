@@ -40,6 +40,7 @@ class KHdb
 
 
 
+
     /**
      * Get the first and last date from the database.
      *
@@ -58,6 +59,46 @@ class KHdb
         return $datecsv;
 
     }
+
+    public function retrieve_form_values2()
+    {
+        global $wpdb;
+        $form_values = array();
+
+
+        // Retrieve the 'form_value' column from the database
+        $results = $wpdb->get_results("SELECT id,form_id, form_value FROM $this->table_name");
+
+
+        if ($results) {
+            error_log('get_results working');
+            error_log(print_r($results, true)); // Log the contents of $results
+        } else {
+            error_log('get_results working KHdb class : ' . $wpdb->last_error);
+            // error_log(print_r($results, true)); // Log the contents of $results
+        }
+
+
+        foreach ($results as $result) {
+            $serialized_data = $result->form_value;
+            $form_id = $result->form_id;
+            $id = $result->id;
+
+            // Unserialize the serialized form value
+            $unserialized_data = unserialize($serialized_data);
+
+            $form_values[] = array(
+                'form_id' => $form_id,
+                'data' => $unserialized_data,
+                'id' => $id,
+
+
+            );
+        }
+
+        return $form_values;
+    }
+
 
     /*
     

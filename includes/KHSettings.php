@@ -50,44 +50,44 @@ class KHSettings
           echo '</div>';*/
 
         ?>
-        <div class="wrap">
-            <h1>Custom Settings</h1>
-            <form method="post" action="options.php">
-                <?php
+<div class="wrap">
+    <h1>Custom Settings</h1>
+    <form method="post" action="options.php">
+        <?php
                 // Output the settings fields
                 settings_fields('custom_settings_group');
                 do_settings_sections('custom-settings');
                 submit_button();
                 ?>
-            </form>
-        </div>
-        <style>
-            .wrap {
-                max-width: 600px;
-                margin-top: 30px;
-            }
+    </form>
+</div>
+<style>
+.wrap {
+    max-width: 600px;
+    margin-top: 30px;
+}
 
-            .wrap h1 {
-                margin-bottom: 20px;
-            }
+.wrap h1 {
+    margin-bottom: 20px;
+}
 
-            .form-field {
-                margin-bottom: 20px;
-            }
+.form-field {
+    margin-bottom: 20px;
+}
 
-            .form-field label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
+.form-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
 
-            .form-field select {
-                width: 100%;
-                padding: 5px;
-                font-size: 14px;
-            }
-        </style>
-        <?php
+.form-field select {
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+}
+</style>
+<?php
     }
 
     // Register and initialize the settings
@@ -144,9 +144,8 @@ class KHSettings
             echo '<option value="' . esc_attr($row->form_id) . '" ' . $selected . '>' . esc_html($row->form_id) . '</option>';
 
         }
-        $formIdsString = '';
-        $selected2 = ($formIdsString == $form_id) ? 'selected' : '';
-        echo '<option value="' . $formIdsString . '" ' . $selected2 . '> ALL </option>';
+        $selected_all = ($form_id == '1') ? 'selected' : '';
+        echo '<option value="1" ' . $selected_all . '>ALL</option>';
         echo '</select>';
         echo '</div>';
     }

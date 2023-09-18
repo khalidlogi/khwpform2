@@ -348,18 +348,16 @@ if (!class_exists('KHMYCLASS')) {
 <?php
             // Retrieve the form values from the database
             $formbyid = get_option('form_id_setting');
+            error_log('form_id_setting' . $formbyid);
 
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'wpforms_db2';
             echo '<div class="form-wraper">';
 
             if (empty($formbyid)) {
                 echo 'To proceed, please create a form and ensure that its ID is added<a href="' . admin_url('admin.php?page=khwplist.php') . '">
                 Go to the settings page</a> to change the form ID value.';
-                $results_formids = $wpdb->get_results("SELECT DISTINCT form_id FROM $table_name");
+                // $results_formids = $wpdb->get_results("SELECT DISTINCT form_id FROM $table_name");
 
-                $formbyid = '';
-                // Stop further execution if the option is empty
+
             }
 
 
@@ -430,7 +428,7 @@ if (!class_exists('KHMYCLASS')) {
             $table_name = $wpdb->prefix . 'wpforms_db2';
 
             // Retrieve the 'form_value' column from the database
-            if ($formid === '' || $formid === 'all') {
+            if ($formid === '' || $formid === '1') {
                 $results = $wpdb->get_results("SELECT id, form_id, form_value FROM $table_name");
             } else {
                 $results = $wpdb->get_results("SELECT id, form_id, form_value FROM $table_name  where form_id = '{$formid}'");

@@ -16,59 +16,23 @@ if (!class_exists('KHCSV')) {
             //$this->export_form_data();
         }
 
-        public function retrieve_form_values2()
-        {
-            global $wpdb;
-
-            $table_name = $wpdb->prefix . 'wpforms_db2';
-
-            // Retrieve the 'form_value' column from the database
-            $results = $wpdb->get_results("SELECT form_id, form_value FROM $table_name");
-
-
-            if ($results) {
-                error_log('get_results working');
-            } else {
-                error_log($wpdb->last_error);
-            }
-
-            $form_values = array();
-
-            foreach ($results as $result) {
-                $serialized_data = $result->form_value;
-                $form_id = $result->form_id;
-
-                // Unserialize the serialized form value
-                $unserialized_data = unserialize($serialized_data);
-
-                $form_values[] = array(
-                    'form_id' => $form_id,
-                    'data' => $unserialized_data,
-
-
-                );
-            }
-
-            return $form_values;
-        }
 
         public function export_form_data()
         {
             global $wpdb;
-
-            $table_name = $wpdb->prefix . 'wpforms_db2';
-
-            // Retrieve the form values from the database
-            $form_values = $this->retrieve_form_values2();
-
             // Create an instance of KHdb
             $khdb = new KHdb();
+
+            // Retrieve the form values from the database
+            $form_values = $khdb->retrieve_form_values2();
+
+
 
             // Call the getDate() method
             $datecsv = $khdb->getDate();
 
             // Start building the HTML table
-            $html_table .= " $datecsv \n";
+            $html_table = " $datecsv \n";
             $html_table .= " $ Form ID, Field ,Value \n";
             $html_table .= "Form ID, Field ,Value \n";
 
