@@ -57,6 +57,7 @@ if (!class_exists('KHMYCLASS')) {
 
         public $mydb;
 
+        protected $table_name;
         public $myselectedformid;
 
         /**
@@ -179,25 +180,6 @@ if (!class_exists('KHMYCLASS')) {
 
             // Parse the serialized form data
             parse_str($form_data, $fields);
-            /* foreach ($fields as $field_name => $field_value) {
-                 $d = '';
-                 $d .= " $field_name  $field_value  ";
-             }
-
-             foreach ($data as $key => $value) {
-                 echo $key . ': ' . $value . "\n";
-               }
-
-            $keys = array_keys($fields);
-
-            for ($i = 0; $i < count($keys); $i++) {
-                $key = $keys[$i];
-                $value = $fields[$key];
-
-                echo $key . ': ' . $value . "\n";
-            }
-
-            wp_send_json_success($keys); */
 
             $status = $wpdb->update(
                 $table_name,
@@ -234,13 +216,19 @@ if (!class_exists('KHMYCLASS')) {
         {
             wp_enqueue_style('form-values-style', plugin_dir_url(__FILE__) . 'assets/css/form-values.css');
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css', array(), '5.15.3');
-
+            // Enqueue jQuery UI stylesheet (optional)
+            wp_enqueue_style('jquery-ui-style', plugin_dir_url(__FILE__) . 'assets/css/jquery-ui.css');
         }
         function enqueue_custom_script()
         {
             wp_enqueue_script('custom-script', plugin_dir_url(__FILE__) . 'assets/js/custom-script.js', array('jquery'), '1.0', true);
             wp_localize_script('custom-script', 'custom_vars', array('ajax_url' => admin_url('admin-ajax.php')));
+            wp_enqueue_script('jquery-ui-core', plugin_dir_url(__FILE__) . 'assets/js/jquery-ui-core', array('jquery'), '1.0', true);
+            wp_enqueue_script('jquery-ui-droppable');
+
+
         }
+
 
 
         function get_form_values()
@@ -299,13 +287,8 @@ if (!class_exists('KHMYCLASS')) {
 
             $id = $_POST['form_id'];
 
-            // Define your table name
-            $table_name = $wpdb->prefix . 'wpforms_db2';
+            $this->mydb->delete_data($id);
 
-            // Delete the row with the specified form_id
-            $wpdb->delete($table_name, array('id' => $id));
-
-            wp_die(); // This is required to terminate immediately and return a proper response
         }
 
 
@@ -315,107 +298,78 @@ if (!class_exists('KHMYCLASS')) {
         function display_form_values_shortcode($atts)
         {
             global $wpdb;
-            $table_name = $wpdb->prefix . 'wpforms_db2';
 
-            $form_values = $this->retrieve_form_values();
-
-            foreach ($form_values as $form_value) {
-                $form_id = $form_value['form_id'];
-                $id = $form_value['id'];
-            }
-
-            ob_start(); // Start output buffering
-
-            ?>
-<div id="edit-popup" class="edit-popup" style="display: none;">
-    <div class="popup-content">
-        <button class="dismiss-btn"><i class="fas fa-times"></i></button>
-        <h1>Edit values </h1>
-        <form id="edit-form" class="edit-form input-row"">
-
-            <button id=" submit-button">Submit</button>
-
-            <div id="result"></div>
-            <!-- Form fields go here -->
-
-            <!-- Add this button to your HTML where you want the update button to appear -->
-
-        </form> <button type=" submit" data-form-id="<?php echo esc_attr($form_id); ?>" data-id="0"
-            class="update-btn">Save</button>
-    </div>
-</div>
-
-<?php
-            // Retrieve the form values from the database
             $formbyid = get_option('form_id_setting');
             error_log('form_id_setting' . $formbyid);
 
-            echo '<div class="form-wraper">';
+            if ($this->mydb->is_table_empty() === true) {
+                ob_start();
+                echo '<div style="text-align: center; color: red;">No data available! Please add a form and try again.</div>';
+                return ob_get_clean();
+            } else {
+                ob_start();
 
-            if (empty($formbyid)) {
-                echo 'To proceed, please create a form and ensure that its ID is added<a href="' . admin_url('admin.php?page=khwplist.php') . '">
-                Go to the settings page</a> to change the form ID value.';
-                // $results_formids = $wpdb->get_results("SELECT DISTINCT form_id FROM $table_name");
+                $form_values = $this->retrieve_form_values($formbyid);
 
-
-            }
-
-
-            $form_values = $this->retrieve_form_values($formbyid);
-
-
-
-            if (!empty($form_values)) {
-
-
-                echo '<div class="container">';
-                echo 'Number of forms submitted: ' . $this->mydb->count_items($this->myselectedformid);
-
-                //  error_log('count items' . $mydb->count_items(11) . 'id from ajax' . $id . '');
                 foreach ($form_values as $form_value) {
                     $form_id = $form_value['form_id'];
-                    $data = $form_value['data'];
                     $id = $form_value['id'];
+                }
+
+                //include edit-form file
+                include_once plugin_dir_path(__FILE__) . 'includes/html/edit_popup.php';
 
 
-                    echo '<div class="form-set-container" data-id="' . esc_attr($id) . '">';
-                    echo '<button class="delete-btn" data-form-id="' . esc_attr($id) . '"><i class="fas fa-trash"></i></button>';
-                    //echo '<button class="edit-btn" data-form-id="' . esc_attr($form_id) . '"><i class="fas fa-edit"></i></button>';
-                    echo '<button class="edit-btn"  data-form-id="' . esc_attr($form_id) . '" data-id="' . esc_attr($id) . '"><i class="fas fa-edit"></i></button>';
+                echo '<div class="form-wraper">';
 
-                    // Display the form_id as a single line
-                    echo '<div class="form-id-container">';
-                    echo '<span class="form-id-label">Form ID:</span>';
-                    echo '<span class="form-id-value">' . esc_html($form_id) . '</span>';
-                    echo '</div>';
+                if (empty($formbyid)) {
+                    echo 'To proceed, please create a form and ensure that its ID is added<a href="' . admin_url('admin.php?page=khwplist.php') . '">Go to the settings page</a> to change the form ID value.';
+                }
 
-                    // Display each form_value key-value pair
-                    foreach ($data as $key => $value) {
-                        // Skip if the value is empty
-                        if (empty($value)) {
-                            continue;
+
+                if ($form_values) {
+                    echo '<div class="container">';
+                    echo 'Number of forms submitted: ' . $this->mydb->count_items($this->myselectedformid);
+
+                    foreach ($form_values as $form_value) {
+                        $form_id = $form_value['form_id'];
+                        $data = $form_value['data'];
+                        $id = $form_value['id'];
+
+                        echo '<div class="form-set-container" data-id="' . esc_attr($id) . '">';
+                        echo '<button class="delete-btn" data-form-id="' . esc_attr($id) . '"><i class="fas fa-trash"></i></button>';
+                        echo '<button class="edit-btn"  data-form-id="' . esc_attr($form_id) . '" data-id="' . esc_attr($id) . '"><i class="fas fa-edit"></i></button>';
+
+                        echo '<div class="form-id-container">';
+                        echo '<span class="form-id-label">Form ID:</span>';
+                        echo '<span class="form-id-value">' . esc_html($form_id) . '</span>';
+                        echo '</div>';
+
+                        foreach ($data as $key => $value) {
+                            if (empty($value)) {
+                                continue;
+                            }
+
+                            echo '<div class="form-data-container">';
+                            echo '<span class="field-label">' . esc_html($key) . ':</span>';
+                            echo '<span class="value">' . esc_html($value) . '</span>';
+                            echo '</div>';
                         }
 
-                        echo '<div class="form-data-container">';
-                        echo '<span class="field-label">' . esc_html($key) . ':</span>';
-                        echo '<span class="value">' . esc_html($value) . '</span>';
                         echo '</div>';
                     }
 
-                    echo '</div>'; // Close form-set-container
+                    echo '<button class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
+                    echo '<button class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
+
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</div>';
+
+                    return ob_get_clean();
                 }
-
-                echo '<button class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
-                echo '<button class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
-
-                echo '</div>'; // Close form-values-container
-                echo '</div>'; // Close form-wraper
-                echo '</div>'; // Close container
-
-                return ob_get_clean(); // Return the shortcode output
             }
         }
-
 
 
 
@@ -474,6 +428,7 @@ if (!class_exists('KHMYCLASS')) {
         private function setup_constants()
         {
 
+            global $wpdb;
             //get the default form_id
             $this->myselectedformid = (get_option('form_id_setting')) ? get_option('form_id_setting') : '';
             error_log('myselectedformid ' . $this->myselectedformid);
@@ -491,14 +446,10 @@ if (!class_exists('KHMYCLASS')) {
             if (!defined('WPFORMS_PLUGIN_URL')) {
                 define('KHFORM_URL', plugin_dir_url(__FILE__));
             }
+
+            $this->table_name = $wpdb->prefix . 'wpforms_db2';
+
         }
-
-
-
-
-
-
-
 
 
 
@@ -642,7 +593,7 @@ if (!class_exists('KHMYCLASS')) {
 
 if (class_exists('KHMYCLASS')) {
     new KHMYCLASS();
-    new KHdb();
+    //new KHdb();
     new KHCSV();
     new KHSettings();
     new KHPDF();

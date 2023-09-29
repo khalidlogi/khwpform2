@@ -210,3 +210,8 @@ button.dismiss-btn {
 .same-id-row {
   border-bottom: 5px solid #ccc;
 }
+
+/* make the edit form draggable*/
+.draggable {
+  cursor: move; /* Add cursor: move to indicate draggable */
+}

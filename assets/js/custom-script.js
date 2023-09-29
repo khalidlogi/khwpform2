@@ -1,6 +1,5 @@
 jQuery(document).ready(function ($) {
   //select from options list
-
   //update values
   $(".update-btn").on("click", function () {
     var button = $(this); // Store the reference to the button element
@@ -29,6 +28,8 @@ jQuery(document).ready(function ($) {
           .html('<i class="fa fa-spinner fa-spin"></i> Saving...');
       },
       success: function (response) {
+        //trying to update the value of the row with id = id
+
         //alert(response.data.fields);
         console.log("response from PHP:", response);
         if (response.success) {
@@ -119,6 +120,7 @@ jQuery(document).ready(function ($) {
 
           // Show the edit popup form
           $("#edit-popup").show();
+          $("#edit-popup").draggable();
         } else {
           // Handle error
           console.log("Error fetching form fields.");

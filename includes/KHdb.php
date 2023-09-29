@@ -15,13 +15,28 @@ class KHdb
         $this->table_name = $wpdb->prefix . 'wpforms_db2';
         //$this->count_items();
     }
+
+    // Description: Deletes a row from the database table based on the specified ID.
+// Parameters:
+// - $id (int): The ID of the row to delete.
+
+    function delete_data($id)
+    {
+        global $wpdb;
+
+        // Delete the row with the specified form_id
+        $wpdb->delete($this->table_name, array('id' => $id));
+
+        wp_die(); // This is required to terminate immediately and return a proper response
+    }
+
     public function count_items($formid = null)
     {
 
         global $wpdb;
         $items_count = 0;
         $this->formid = $formid;
-        if ($formid === '') {
+        if ($formid === '1') {
             // If $formid is null, select all rows
             $query = "SELECT COUNT(DISTINCT id) FROM {$this->table_name}";
         } else {
@@ -36,6 +51,25 @@ class KHdb
 
 
 
+    }
+
+    /**
+     * This function checks if there is no data in a database table.
+     *
+     * @param string $table_name The name of the table to check.
+     * @return bool True if the table is empty, false if it has data.
+     */
+    function is_table_empty()
+    {
+        global $wpdb;
+
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM $this->table_name");
+
+        if ($count === '0') {
+            return true; // Table is empty
+        } else {
+            return false; // Table has data
+        }
     }
 
 
