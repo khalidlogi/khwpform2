@@ -23,6 +23,7 @@ if (!class_exists('KHPDF')) {
         public function export_form_data_pdf()
         {
             global $wpdb;
+
             // Create an instance of KHdb
             $khdb = new KHdb();
 

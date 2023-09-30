@@ -1,5 +1,6 @@
 <?php
 
+
 if (!class_exists('KHCSV')) {
 
     class KHCSV
@@ -55,7 +56,7 @@ if (!class_exists('KHCSV')) {
 
             // Set the response headers for downloading
             header('Content-Type:text/csv');
-            header('Content-Disposition: attachment; filename="form_data_table.csv"');
+            header('Content-Disposition: attachment; filename="WPForms-Data-Entries" ' . date('Y-m-d') . '.csv');
 
             // Output the HTML table
             echo $html_table;

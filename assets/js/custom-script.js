@@ -141,8 +141,10 @@ jQuery(document).ready(function ($) {
   });
 
   $(".export-btn-pdf").on("click", function () {
+    var nonce = $(".export-btn-pdf").data("nonce");
     var data = {
       action: "export_form_data_pdf",
+      nonce: nonce,
     };
     window.location.href = custom_vars.ajax_url + "?" + $.param(data);
   });
