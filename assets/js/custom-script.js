@@ -1,25 +1,26 @@
 jQuery(document).ready(function ($) {
-  //select from options list
   //update values
   $(".update-btn").on("click", function () {
     var button = $(this); // Store the reference to the button element
+    // Create the "Refresh Page" button.
+    var refreshButton =
+      '<button style="width: 100%;color:blue; border-radius: 4px;background-color: #EDF9FF;border: 1px solid #0497E1;" id="refresh-page-button">Refresh Page</button>';
     var formData = $("#edit-form").serialize();
     alert("formData: " + formData);
     var form_id = $(this).data("form-id");
     var id = $("label#myid").data("id");
-
-    alert(id);
-    //var id = 1;
+    var nonceupdate = $(this).data("nonceupdate");
 
     // Use AJAX to trigger the update function on the server
     $.ajax({
       type: "POST",
       url: custom_vars.ajax_url,
       data: {
-        action: "update_form_values", // Update to the correct AJAX action
+        action: "update_form_values",
         form_id: form_id,
         formData: formData,
         id: id,
+        nonceupdate: nonceupdate,
       },
       beforeSend: function () {
         // Disable the button before the AJAX request is sent
@@ -28,9 +29,6 @@ jQuery(document).ready(function ($) {
           .html('<i class="fa fa-spinner fa-spin"></i> Saving...');
       },
       success: function (response) {
-        //trying to update the value of the row with id = id
-
-        //alert(response.data.fields);
         console.log("response from PHP:", response);
         if (response.success) {
           // You can access the 'data-id' value here
@@ -42,6 +40,11 @@ jQuery(document).ready(function ($) {
 
           console.log("Form values updated successfully.");
           button.html('<i class="fa fa-check"></i> Saved');
+          $("#edit-popup").append(refreshButton);
+          $("#refresh-page-button").click(function () {
+            console.log("Button clicked."); // Add this line
+            window.location.href = window.location.href;
+          });
 
           // You can add any additional actions here, like refreshing the form or displaying a success message.
         } else {
@@ -61,10 +64,11 @@ jQuery(document).ready(function ($) {
   });
 
   $(".edit-btn").on("click", function () {
-    var bt = $("<button>", {
+    /* var bt = $("<button>", {
       text: "Update",
       class: "update-btn",
-    });
+    });*/
+
     var form_id = $(this).data("form-id");
     var id = $(this).data("id");
     console.log("Form ID:", form_id);
@@ -77,28 +81,18 @@ jQuery(document).ready(function ($) {
         form_id: form_id,
         id: id,
       },
+
       success: function (response) {
         console.log(response);
         if (response.success) {
           $("button.update-btn").attr("data-id", "2");
-
           var fields = response.data.fields;
-
           // Clear existing inputs
           $("#edit-form").empty();
-
           $("#edit-form").append(
-            `<label  id='myid' data-id='${id}'>${id}</label>`
+            `<label  id='myid' data-id='${id}'>Form id: ${id}</label>`
           );
 
-          /*var button = $("<button>", {
-            type: "submit",
-            "data-id": id,
-            class: "update-btn",
-            text: "Save",
-          });
-          $("#edit-form").append(button); // Replace 'containerId' with your container's ID
-*/
           // Populate inputs with fetched fields
           $.each(fields, function (index, field) {
             var input = $("<input>", {
@@ -152,30 +146,23 @@ jQuery(document).ready(function ($) {
   $(".delete-btn").on("click", function () {
     var form_id = $(this).data("form-id");
     var id = $(this).data("form-id");
+    var nonce = $(this).data("nonce");
 
     if (confirm("Are you sure you want to delete this?")) {
-      $("#delete-button").attr("href", "query.php?ACTION=delete&ID='1'");
       var data = {
         action: "delete_form_row",
         form_id: form_id,
         id: id,
+        nonce: nonce,
       };
 
       $.post(custom_vars.ajax_url, data, function (response) {
+        console.log(response);
         // Update the page or handle the response as needed
         location.reload(); // Reload the page for demonstration
       });
     } else {
       return false;
     }
-
-    /*  if (confirm("Are you sure you want to delete this form row?")) {
-      var data = {
-        action: "delete_form_row",
-        form_id: form_id,
-      }; $.post(custom_vars.ajax_url, data, function (response) {
-      // Update the page or handle the response as needed
-      location.reload(); // Reload the page for demonstration
-    });*/
   });
 });

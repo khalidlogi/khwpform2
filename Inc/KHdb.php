@@ -142,6 +142,59 @@ public function delete_tabledb() {
 
     }
 
+      /**
+         *  Function to retrieve and unserialize the form values from the database.
+         *
+         * @since 1.0.0
+         */
+        public function retrieve_form_values($formid = '')
+        {
+            global $wpdb;
+
+
+            // Retrieve the 'form_value' column from the database
+            if ($formid === '' || $formid === '1') {
+                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name");
+                error_log(print_r($results, true));
+            } else {
+                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id = '{$formid}'");
+                error_log(print_r($results, true));
+            }
+
+            if ($results === false) {
+                error_log("SQL Error: " . $wpdb->last_error);
+            } else {
+                error_log(print_r($results, true));
+            }
+
+            if ($results === false) {
+                echo "Database Error: " . $wpdb->last_error;
+            }
+
+            $form_values = array();
+
+            foreach ($results as $result) {
+                $serialized_data = $result->form_value;
+                $form_id = $result->form_id;
+                $id = $result->id;
+
+                // Unserialize the serialized form value
+                $unserialized_data = unserialize($serialized_data);
+
+                // Add the 'Comment or Message' value to the form_values array
+                $form_values[] = array(
+                    'form_id' => $form_id,
+                    'id' => $id,
+                    'data' => $unserialized_data,
+                    'fields' => $unserialized_data,
+                );
+
+            }
+
+            return $form_values;
+        }
+
+        
     public function retrieve_form_values2()
     {
         global $wpdb;

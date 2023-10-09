@@ -4,7 +4,6 @@
 class KHSettings
 {
 
-
     protected $table_name;
 
 
@@ -62,22 +61,6 @@ class KHSettings
     }
 
 
-    /*
-     **Checks if WPForms plugin is active and adds custom notices in front page.
-      function wpforms_notice_front()
-    {
-        // Check if WPForms Lite or WPForms Pro is installed and activated.
-        if (is_plugin_active('wpforms-lite/wpforms.php') || is_plugin_active('wpforms/wpforms.php')) {
-            echo '<a href="' . admin_url('admin.php?page=khwplist.php') . '">Settings DB</a>';
-            echo '<div style="text-align: center; color: red;">WPForms is active.</div>';
-        } else {
-            echo '<a href="' . admin_url('admin.php?page=khwplist.php') . '">Settings DB</a>';
-            echo '<div style="text-align: center; color: red;">WPForms is not active.</div>';
-        }
-    }  
-    */
-
-
 
     /**
      * @param string $plugin
@@ -108,17 +91,11 @@ class KHSettings
         ?>
         <div class="notice notice-success is-dismissible">
             <p>
-                <?php _e('WPForms is currently active. To get started with this plugin, you can begin by creating a form using the WPForms plugin.
-
-
-
-
-.
-
-
-
-
-', 'your-text-domain'); ?>
+                <?php _e('WPForms is currently active. To get started with this plugin, 
+                you can begin by creating a form using the WPForms plugin.', 'your-text-domain'); ?>
+            </p>
+            <p>
+                <?php _e('Add shortcode: [display_form_values], into any page/post to display the entries', 'your-text-domain'); ?>
             </p>
         </div>
         <?php
@@ -134,7 +111,7 @@ class KHSettings
         add_menu_page(
             'khwplist.php',
             // Page Title
-            'WpformsDb',
+            'KHWpformsDb',
             // Menu Title
             'manage_options',
             // Capability required to access the page
@@ -163,7 +140,7 @@ class KHSettings
 
         ?>
         <div class="wrap">
-            <h1>Custom Settings</h1>
+            <h1>Settings</h1>
             <form method="post" action="options.php">
                 <?php
                 // Output the settings fields
@@ -225,8 +202,19 @@ class KHSettings
             'custom-settings',
             'custom_settings_section'
         );
+        // add select option field 
+        // Add the capability field to the same section
+        /* add_settings_field(
+             'my_plugin_capability',
+             'Edit access',
+             array($this, 'my_plugin_capability_callback'),
+             'custom-settings',
+             'custom_settings_section' // Specify the section name
+         );*/
+
         // Register the settings
         register_setting('custom_settings_group', 'form_id_setting');
+        // register_setting('custom_settings_group', 'my_plugin_capability');
     }
 
     // Callback function for the settings section
@@ -235,7 +223,26 @@ class KHSettings
         echo "Select the wpforms' form ID:";
     }
 
-    // Callback function for the form ID setting field
+    /* function my_plugin_capability_callback()
+     {
+         $capability_name = esc_attr(get_option('my_plugin_capability'));
+
+
+         ?> <select name="my_plugin_capability">
+     <option value="Edit entries" <?php selected($capability_name, 'Edit entries'); ?>>Edit entries</option>
+     <option value="View entries" <?php selected($capability_name, 'View entries'); ?>>View entries</option>
+     <option value="Deny access" <?php selected($capability_name, 'Deny access'); ?>>Deny access</option>
+
+     </option>
+ </select>
+ <?php
+
+     }*/
+
+
+
+
+
     // Callback function for the form ID setting field
     function form_id_setting_callback()
     {
@@ -280,5 +287,28 @@ class KHSettings
         return $links;
     }
 
+    function user_roles()
+    {
+        $my_plugin_capability = esc_attr(get_option('my_plugin_capability'));
+        // Get current user
+        if (wp_get_current_user()) {
+            $current_user = wp_get_current_user();
+            $user_role = $current_user->roles[0];
+
+        }
+
+        // Get user role
+
+
+        if (!isset($current_user->user_nicename)) {
+            return 'guest';
+        } else {
+            return $user_role;
+        }
+
+
+
+
+    }
 
 }

@@ -58,6 +58,9 @@
 .delete-btn:hover {
   color: #ff5555;
 }
+.delete-btn2:hover {
+  color: #ff5555;
+}
 
 /* Rest of the existing CSS styles */
 /* Add these styles to your plugin's CSS file or style block */
@@ -214,4 +217,16 @@ button.dismiss-btn {
 /* make the edit form draggable*/
 .draggable {
   cursor: move; /* Add cursor: move to indicate draggable */
+}
+
+.delete-btn2 {
+  position: absolute;
+  top: 40px;
+  right: 5px;
+  background-color: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
