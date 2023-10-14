@@ -200,14 +200,22 @@ class KHSettings
             'custom-settings',
             'custom_settings_section'
         );
-
+        // add select option field 
+        // Add the capability field to the same section
+        /* add_settings_field(
+             'my_plugin_capability',
+             'Edit access',
+             array($this, 'my_plugin_capability_callback'),
+             'custom-settings',
+             'custom_settings_section' // Specify the section name
+         );*/
 
         // Register the settings
         register_setting('custom_settings_group', 'form_id_setting');
         // register_setting('custom_settings_group', 'my_plugin_capability');
     }
 
-    // Call back function for the settings section
+    // Callback function for the settings section
     function custom_settings_section_callback()
     {
         echo "After the initial submission of a WPForms form, 
@@ -215,6 +223,26 @@ class KHSettings
 
         echo "Select the wpforms' form ID:";
     }
+
+    /* function my_plugin_capability_callback()
+     {
+         $capability_name = esc_attr(get_option('my_plugin_capability'));
+
+
+         ?> <select name="my_plugin_capability">
+    <option value="Edit entries" <?php selected($capability_name, 'Edit entries'); ?>>Edit entries</option>
+    <option value="View entries" <?php selected($capability_name, 'View entries'); ?>>View entries</option>
+    <option value="Deny access" <?php selected($capability_name, 'Deny access'); ?>>Deny access</option>
+
+    </option>
+</select>
+<?php
+
+     }*/
+
+
+
+
 
     // Callback function for the form ID setting field
     function form_id_setting_callback()
@@ -252,9 +280,6 @@ class KHSettings
     }
 
 
-    /**
-     * call back function for action link
-     */
     function wk_plugin_settings_link($links)
     {
 
@@ -263,5 +288,28 @@ class KHSettings
         return $links;
     }
 
+    function user_roles()
+    {
+        $my_plugin_capability = esc_attr(get_option('my_plugin_capability'));
+        // Get current user
+        if (wp_get_current_user()) {
+            $current_user = wp_get_current_user();
+            $user_role = $current_user->roles[0];
+
+        }
+
+        // Get user role
+
+
+        if (!isset($current_user->user_nicename)) {
+            return 'guest';
+        } else {
+            return $user_role;
+        }
+
+
+
+
+    }
 
 }

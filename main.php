@@ -21,7 +21,10 @@ Text Domain: khwpforms
 /*
 to do:
 
-remove logs comments , var_dump//  
+remove logs comments , var_dump ,  console.log//  
+//add nonce to export_form_data
+// optional add validating to js 
+fix refresh button apearing second time
 
 Installation
 Install this plugin, along with WPForms (or WPForms Lite).
@@ -30,8 +33,6 @@ Click “WpformsDb” from the Dashboard, then select “Form id”. From the dr
 
 
 */
-
-
 
 
 if (!defined('ABSPATH')) {
@@ -52,10 +53,9 @@ if (!class_exists('KHMYCLASS')) {
          *
          * @var string
          */
-        public $version = '0.1';
+        public $version = '1.0';
 
         public $mydb, $mysetts;
-
 
         protected $table_name;
 
@@ -84,8 +84,6 @@ if (!class_exists('KHMYCLASS')) {
             //add_action('wp_ajax_callback_options', array($this, 'callback_options')); // For logged-in users
 //add_action('wp_ajax_nopriv_callback_options', array($this, 'callback_options'));
 
-
-            // Hook the AJAX action
             add_action('wp_ajax_update_form_values', array($this, 'update_form_values'));
             add_action('wp_ajax_nopriv_update_form_values', array($this, 'update_form_values'));
 
@@ -97,8 +95,6 @@ if (!class_exists('KHMYCLASS')) {
             add_action('wp_ajax_delete_form_row', array($this, 'delete_form_row'));
             add_action('wp_ajax_nopriv_delete_form_row', array($this, 'delete_form_row')); // If you want to allow non-logged-in users
 
-
-
             $this->setup_constants();
             $this->includes();
 
@@ -108,6 +104,50 @@ if (!class_exists('KHMYCLASS')) {
 
             //require_once(ABSPATH . '/wp-content/plugins/wpforms-lite/wpforms.php');
 
+        }
+
+        /**
+         * Include all the necessary files
+         */
+        private function includes()
+        {
+            // include_once KHFORM_PATH . 'includes/KHWPformdb.php';
+            include_once KHFORM_PATH . 'Inc/KHCSV.php';
+            include_once KHFORM_PATH . 'Inc/KHSettings.php';
+            include_once KHFORM_PATH . 'Inc/KHPDF.php';
+            include_once KHFORM_PATH . 'Inc/KHdb.php';
+
+        }
+
+        /**
+         * Enqueue CSS styles for the form values.
+         */
+        function enqueue_form_values_css()
+        {
+            // Enqueue your custom CSS.
+            wp_enqueue_style('form-values-style', plugin_dir_url(__FILE__) . 'assets/css/form-values.css');
+
+            // Enqueue Font Awesome from a CDN.
+            wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css', array(), '5.15.3');
+
+            // Enqueue jQuery UI stylesheet (optional).
+            wp_enqueue_style('jquery-ui-style', plugin_dir_url(__FILE__) . 'assets/css/jquery-ui.css');
+        }
+
+        /**
+         * Enqueue custom JavaScript script.
+         */
+        function enqueue_custom_script()
+        {
+            // Enqueue your custom JavaScript.
+            wp_enqueue_script('custom-script', plugin_dir_url(__FILE__) . 'assets/js/custom-script.js', array('jquery'), '1.0', true);
+
+            // Localize the script with custom variables for AJAX.
+            wp_localize_script('custom-script', 'custom_vars', array('ajax_url' => admin_url('admin-ajax.php')));
+
+            // Enqueue jQuery UI scripts (core and droppable) (optional).
+            wp_enqueue_script('jquery-ui-core', plugin_dir_url(__FILE__) . 'assets/js/jquery-ui-core', array('jquery'), '1.0', true);
+            wp_enqueue_script('jquery-ui-droppable');
         }
 
         /**
@@ -139,16 +179,24 @@ if (!class_exists('KHMYCLASS')) {
                 define('KHFORM_URL', plugin_dir_url(__FILE__));
             }
 
-            //table name
+            //table name wpforms_db2
             $this->table_name = $wpdb->prefix . 'wpforms_db2';
         }
 
+        /**
+         * function to create table
+         *
+         */
         public function create_table()
         {
             global $wpdb;
             $this->mydb->create_tabledb();
         }
 
+        /**
+         * Delete wpforms_db2 table on plugin deactivation
+         *
+         */
         public function deactivate()
         {
             global $wpdb;
@@ -158,35 +206,15 @@ if (!class_exists('KHMYCLASS')) {
         /**
          * Plugin activation hook callback function.
          */
-        public function activate_plugin_name()
+        public function activate()
         {
             // Create the table on plugin activation
             $this->create_table();
         }
 
-        /**
-         * Plugin deactivation hook callback function.
-         */
-
 
         /**
-         * Include all the necessary files
-         */
-        private function includes()
-        {
-            // include_once KHFORM_PATH . 'includes/KHWPformdb.php';
-            include_once KHFORM_PATH . 'Inc/KHCSV.php';
-            include_once KHFORM_PATH . 'Inc/KHSettings.php';
-            include_once KHFORM_PATH . 'Inc/KHPDF.php';
-            include_once KHFORM_PATH . 'Inc/KHdb.php';
-
-        }
-
-
-
-
-        /**
-         *  update form values
+         *  Update form values
          *
          * @return void
          */
@@ -197,13 +225,14 @@ if (!class_exists('KHMYCLASS')) {
 
             // Retrieve the serialized form data from the AJAX request
             $form_data = sanitize_text_field($_POST['formData']);
+
+            error_log(print_r($form_data, true));
             $form_id = intval($_POST['form_id']);
             $id = intval($_POST['id']);
 
             // Parse the serialized form data
             parse_str($form_data, $fields);
 
-            ////////////
 
             if (!$id) {
                 wp_send_json_error('Invalid ID');
@@ -233,43 +262,18 @@ if (!class_exists('KHMYCLASS')) {
                 wp_send_json_error(array('message' => $error_message));
             } else {
                 // Update was successful, send a success response
-                wp_send_json_success(array('message' => 'Update successful!', 'fields from update' => $fields));
+                wp_send_json_success(array('message' => 'Update successful!', 'fieldsfromupdate' => $fields));
             }
 
         }
 
 
         /**
-         * Enqueue styles and scripts
-         *
-         * @return void
-         */
-        function enqueue_form_values_css()
-        {
-            wp_enqueue_style('form-values-style', plugin_dir_url(__FILE__) . 'assets/css/form-values.css');
-            //wp_enqueue_style('font-awesome', plugin_dir_url(__FILE__) . 'css/fontawesome.min.css');
-
-            wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css', array(), '5.15.3');
-            // Enqueue jQuery UI stylesheet (optional)
-            wp_enqueue_style('jquery-ui-style', plugin_dir_url(__FILE__) . 'assets/css/jquery-ui.css');
-        }
-        function enqueue_custom_script()
-        {
-            wp_enqueue_script('custom-script', plugin_dir_url(__FILE__) . 'assets/js/custom-script.js', array('jquery'), '1.0', true);
-            wp_localize_script('custom-script', 'custom_vars', array('ajax_url' => admin_url('admin-ajax.php')));
-            wp_enqueue_script('jquery-ui-core', plugin_dir_url(__FILE__) . 'assets/js/jquery-ui-core', array('jquery'), '1.0', true);
-            wp_enqueue_script('jquery-ui-droppable');
-
-
-        }
-
-
-
-        /**
-         * Register plugin hooks
+         * Retrieve and return form values
          *
          * @param null
-         * @return void
+         * @return  Array
+         * 
          */
         function get_form_values()
         {
@@ -280,21 +284,18 @@ if (!class_exists('KHMYCLASS')) {
 
 
             // Fetch form_value from the wpform_db2 table based on the form_id
-            $query = "SELECT id, form_value FROM  $this->table_name WHERE id = '{$id}'";
+            $query = $wpdb->prepare("SELECT id, form_value FROM $this->table_name WHERE id = %d", $id);
             $serialized_data = $wpdb->get_results($query);
 
-            /*$value = print_r($serialized_data, true);
-            error_log("get_form_values ~ serialized_data : $value");*/
-
             if ($wpdb->last_error) {
-                error_log($wpdb->last_error);
+                wp_send_json_error('Error: ' . $wpdb->last_error);
             }
+
             if ($serialized_data) {
                 // Unserialize the serialized form value
                 $unserialized_data = unserialize($serialized_data[0]->form_value);
                 //$value2 = print_r($serialized_data, true);
                 //error_log("get_form_values ~ unserialized_data : $value2");
-
                 // Retrieve fields array from the unserialized data
                 $fields = array();
 
@@ -314,11 +315,8 @@ if (!class_exists('KHMYCLASS')) {
         }
 
 
-
         /**
          * delete form row by its id
-         *
-         * @since 1.0.0
          */
         function delete_form_row()
         {
@@ -364,23 +362,24 @@ if (!class_exists('KHMYCLASS')) {
         {
             global $wpdb;
 
+            // see if user do not have authorization 
             if (!current_user_can('manage_options')) {
 
                 ob_start();
 
-                echo '<div style="text-align: center; color: red;">You are not authorized to access this page..</div>';
+                echo '<div style="text-align: center; color: red;">You are not authorized to access this page.<a href="' . wp_login_url() . '">  Login</div>';
+                echo 'login: ' . wp_login_url();
 
                 return ob_get_clean();
 
             } else {
-
 
                 //get the form id
                 $formbyid = $this->myselectedformid;
                 // retrieve form values
                 $form_values = $this->mydb->retrieve_form_values($formbyid);
 
-                error_log('user_role_setting: ' . get_option('user_role_setting'));
+                //error_log('user_role_setting: ' . get_option('user_role_setting'));
 
                 //Check if there is at least one entry
                 if ($this->mydb->is_table_empty() === true) {
@@ -388,7 +387,7 @@ if (!class_exists('KHMYCLASS')) {
 
                     echo '<div style="text-align: center; color: red;">No data available! Please add etries to your form and try again.';
                     echo ' <a style="text-align: center; color: black;" href="' . admin_url('admin.php?page=khwplist.php') . '">Settings
-        DB</a></div>';
+                    DB</a></div>';
 
                     return ob_get_clean();
 
@@ -397,8 +396,8 @@ if (!class_exists('KHMYCLASS')) {
 
 
                     foreach ($form_values as $form_value) {
-                        $form_id = $form_value['form_id'];
-                        $id = $form_value['id'];
+                        $form_id = intval($form_value['form_id']);
+                        $id = intval($form_value['id']);
                     }
 
                     //include edit-form file
@@ -406,10 +405,11 @@ if (!class_exists('KHMYCLASS')) {
 
                     echo '<div class="form-wraper">';
 
+                    // see if there is no form if saved 
                     if (empty($formbyid)) {
                         echo 'To proceed, please create a form and ensure that its ID is added<a
-        href="' . admin_url('admin.php?page=khwplist.php') . '">Go to the settings page</a>| to change the form ID
-    value.';
+                    href="' . admin_url('admin.php?page=khwplist.php') . '">Go to the settings page</a>| to change the form ID
+                    value.';
                     }
 
 
@@ -419,7 +419,7 @@ if (!class_exists('KHMYCLASS')) {
                         echo '<br>';
                         echo 'Default form id: ' . (($this->myselectedformid === '1') ? 'All' : $this->myselectedformid);
                         echo ' <a style="text-align: center; color: black;"
-                               href="' . admin_url('admin.php?page=khwplist.php') . '">Change it here</a></div>';
+                               href="' . admin_url('admin.php?page=khwplist.php') . '">  Change it here</a></div>';
 
                         //$role = (get_option('user_role_setting')) ? get_option('user_role_setting') : 'Admin';
                         //echo 'Who can access: ' . $role;
@@ -452,7 +452,7 @@ if (!class_exists('KHMYCLASS')) {
                                 }
 
                                 echo '<div class="form-data-container">';
-                                echo '<span class="field-label">' . esc_html($key) . ':</span>';
+                                echo '<span class="field-label">' . esc_html($key) . ': </span>';
                                 echo '<span class="value">' . esc_html($value) . '</span>';
                                 echo '</div>';
                             }
@@ -474,72 +474,43 @@ if (!class_exists('KHMYCLASS')) {
         }
 
 
-
-
         /**
-         * Insert data into database
+         * Function to insert data into database
          * @return void
          */
         function process_entry($fields, $entry, $form_data, $entry_id)
         {
 
             global $wpdb;
-            // error_log(" the entry id is: $entry_id");
-            //$error = print_r($fields, true);
-            //error_log('entry_id :' . $error);
-            //$form_id = $form_data['id'];
-            /*$entry_data = array(
-                'form_id' => $entry_id,
-                'status' => 'publish',
-                'referer' => $_SERVER['HTTP_REFERER'],
-                'date_created' => current_time('mysql')
-            );*/
+            $form_date = current_time('Y-m-d H:i:s');
 
             if ($fields) {
 
-                $mydata = $fields;
-                $form_data = array();
-                error_log('fields : ' . print_r($mydata, true));
-                foreach ($mydata as $key => $v) {
+                foreach ($fields as $field) {
+                    $name = sanitize_text_field($field['name']); // Sanitize field name
+                    $value = is_array($field['value']) ? serialize($field['value']) : $field['value'];
+                    //$value = sanitize_text_field($field['value']);
 
-                    //https://github.com/wp-telegram-pro/wp-telegram-pro/blob/25edad549c8e1ad5afdda26d513dad5f427317b0/plugins/WPFormsWPTP.php#L68
+                    // Check if the value contains newlines and replace them with '&'.
+                    $value = str_replace("\n", " & ", $value);
 
-                    $v['value'] = is_array($v['value']) ? implode('|', $v['value']) : $v['value'];
-                    // error_log(print_r($v, true));
-                    $bl = array('\"', "\'", '/', '\\', '"', "'");
-                    $wl = array('&quot;', '&#039;', '&#047;', '&#092;', '&quot;', '&#039;');
-                    $d['value'] = str_replace($bl, $wl, $v['value']);
+                    error_log(print_r('field[name]' . $field['name'], true));
 
-                    $form_data[$v['name']] = $v['value'];
-                    // error_log((" form_data[v['name']" . $form_data[$v['name']]));
-
-                    $form_data = apply_filters('WPFormsDB_before_save_data', $form_data);
-
-                    /* email and name fields may be needed soon
-                    if (isset($field['value']) && '' !== $form_data['value']) {
-                        $field_value = is_array($form_data['value']) ? serialize($field['value']) : $field['value'];
+                    error_log(print_r('field[value]' . $value, true));
 
 
-                        if ($form_data['name'] === 'Email') {
-                            $email = $form_data['value'];
-                        } elseif ($form_data['name'] === 'Name') {
-                            $name = $form_data['value'];
-                        }*/
-
-
+                    $serialized_data[$name] = $value;
                 }
-                $form_post_id = $entry_id;
-                $form_value = serialize($form_data);
-                $form_date = current_time('Y-m-d H:i:s');
-
             }
+
+            // insert data into table
             $wpdb->insert(
                 $wpdb->prefix . 'wpforms_db2',
                 // table name
                 array(
                     //'email' => $email,
                     'form_id' => $entry_id['id'],
-                    'form_value' => $form_value,
+                    'form_value' => serialize($serialized_data),
                     'form_date' => $form_date
                 ),
                 array(
@@ -553,30 +524,23 @@ if (!class_exists('KHMYCLASS')) {
         }
 
 
-
-
-
         /**
-         * Register plugin hooks
+         * Register plugin activation deactivation hooks
          *
          * @param null
          * @return void
          */
         function regsiter_hooks()
         {
-            register_activation_hook(__FILE__, array($this, 'activate_plugin_name'));
+            register_activation_hook(__FILE__, array($this, 'activate'));
             register_deactivation_hook(__FILE__, array($this, 'deactivate'));
 
         }
     }
-
-
-
 }
 
 if (class_exists('KHMYCLASS')) {
     new KHMYCLASS();
     new KHCSV();
     new KHPDF();
-
 }

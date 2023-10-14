@@ -1,17 +1,23 @@
 jQuery(document).ready(function ($) {
-  //update values
+  var buttonAdded = false; // Initialize a variable to track if the button is added.
+
   $(".update-btn").on("click", function () {
-    var button = $(this); // Store the reference to the button element
-    // Create the "Refresh Page" button.
-    var refreshButton =
-      '<button style="width: 100%;color:blue; border-radius: 4px;background-color: #EDF9FF;border: 1px solid #0497E1;" id="refresh-page-button">Refresh Page</button>';
-    var formData = $("#edit-form").serialize();
-    alert("formData: " + formData);
+    var button = $(this);
     var form_id = $(this).data("form-id");
     var id = $("label#myid").data("id");
     var nonceupdate = $(this).data("nonceupdate");
 
-    // Use AJAX to trigger the update function on the server
+    if (!buttonAdded) {
+      var refreshButton =
+        '<button style="width: 100%;color:blue; border-radius: 4px;background-color: #EDF9FF;border: 1px solid #0497E1;" id="refresh-page-button">Refresh Page</button>';
+    } else {
+      refreshButton = "";
+    }
+
+    var formData = $("#edit-form").serialize();
+    var formData = decodeURIComponent(formData); //decode data
+    alert("formData: " + formData);
+
     $.ajax({
       type: "POST",
       url: custom_vars.ajax_url,
@@ -30,23 +36,24 @@ jQuery(document).ready(function ($) {
       },
       success: function (response) {
         console.log("response from PHP:", response);
+
         if (response.success) {
-          // You can access the 'data-id' value here
-
           // Select the div with the matching 'data-id' value and animate it
-
           var fields = response.data.fields;
-          console.log("fields from update: " + fields);
-
+          console.log(
+            "fields from update: " +
+              JSON.stringify(response.data.fieldsfromupdate)
+          );
           console.log("Form values updated successfully.");
           button.html('<i class="fa fa-check"></i> Saved');
+
           $("#edit-popup").append(refreshButton);
+          buttonAdded = true; // Set the flag to indicate the button is added.
+
           $("#refresh-page-button").click(function () {
-            console.log("Button clicked."); // Add this line
+            console.log("Button clicked.");
             window.location.href = window.location.href;
           });
-
-          // You can add any additional actions here, like refreshing the form or displaying a success message.
         } else {
           // Handle error
           console.log("Error updating form values.");
@@ -64,15 +71,10 @@ jQuery(document).ready(function ($) {
   });
 
   $(".edit-btn").on("click", function () {
-    /* var bt = $("<button>", {
-      text: "Update",
-      class: "update-btn",
-    });*/
-
     var form_id = $(this).data("form-id");
     var id = $(this).data("id");
     console.log("Form ID:", form_id);
-    // Use AJAX to fetch form fields based on form_id
+
     $.ajax({
       type: "POST",
       url: custom_vars.ajax_url,
@@ -85,10 +87,11 @@ jQuery(document).ready(function ($) {
       success: function (response) {
         console.log(response);
         if (response.success) {
-          $("button.update-btn").attr("data-id", "2");
+          //$("button.update-btn").attr("data-id", "2");
           var fields = response.data.fields;
           // Clear existing inputs
           $("#edit-form").empty();
+          //Add the relevant id label to the edit form
           $("#edit-form").append(
             `<label  id='myid' data-id='${id}'>Form id: ${id}</label>`
           );
@@ -98,17 +101,19 @@ jQuery(document).ready(function ($) {
             var input = $("<input>", {
               type: field.type,
               name: field.name,
-              value: field.value,
+              value: Array.isArray(field.value)
+                ? field.value.join(" ") // Join array with spaces
+                : field.value,
               class: "input-large",
               id: id,
               placeholder: field.name,
             });
-            $("#edit-form").append(input);
+            $("#edit-form").append(input); // apend all to edit-form
 
             // submit edited fields button
             // Create the button element with attributes
             // bt.appendTo("#edit-form");
-            $("#update-btn").html('<i class="fas fa-check"></i> Checked');
+            //$("#update-btn").html('<i class="fas fa-check"></i> Checked');
             $(this).html('<i class="fas fa-check"></i> Checked');
           });
 
@@ -127,11 +132,15 @@ jQuery(document).ready(function ($) {
     $("#edit-popup").hide();
   });
 
+  //Export to csv data
   $(".export-btn").on("click", function () {
     var data = {
       action: "export_form_data",
     };
-    window.location.href = custom_vars.ajax_url + "?" + $.param(data);
+    // Create a URL by concatenating the "custom_vars.ajax_url" with the query parameters.
+    var url = custom_vars.ajax_url + "?" + $.param(data);
+    // Redirect the user's browser to the constructed URL.
+    window.location.href = url;
   });
 
   $(".export-btn-pdf").on("click", function () {
