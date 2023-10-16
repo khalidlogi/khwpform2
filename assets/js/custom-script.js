@@ -108,14 +108,23 @@ jQuery(document).ready(function ($) {
               id: id,
               placeholder: field.name,
             });
-            $("#edit-form").append(input); // apend all to edit-form
 
+            $("#edit-form").append(input); // apend all to edit-form
             // submit edited fields button
             // Create the button element with attributes
             // bt.appendTo("#edit-form");
             //$("#update-btn").html('<i class="fas fa-check"></i> Checked');
             $(this).html('<i class="fas fa-check"></i> Checked');
           });
+          var input2 = $("<input>", {
+            type: "text",
+            name: "Admin note",
+            class: "input-large",
+            id: "admintext",
+            placeholder: "Admin note",
+            style: "color: red;",
+          });
+          $("#edit-form").append(input2);
 
           // Show the edit popup form
           $("#edit-popup").show();

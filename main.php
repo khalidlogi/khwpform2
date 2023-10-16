@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: kh-wpform2
+Plugin Name: kh-wpform
 
 Plugin URI: https://kh-test.com/
 
@@ -21,7 +21,7 @@ Text Domain: khwpforms
 /*
 to do:
 
-remove logs comments , var_dump ,  console.log//  
+remove logs comments , var_dump ,  console.log , error_reporting//  
 //add nonce to export_form_data
 // optional add validating to js 
 fix refresh button apearing second time
@@ -38,7 +38,8 @@ Click “WpformsDb” from the Dashboard, then select “Form id”. From the dr
 if (!defined('ABSPATH')) {
     exit;
 }
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 if (!class_exists('KHMYCLASS')) {
 
@@ -403,23 +404,26 @@ if (!class_exists('KHMYCLASS')) {
                     //include edit-form file
                     include_once KHFORM_PATH . 'Inc/html/edit_popup.php';
 
-                    echo '<div class="form-wraper">';
+                    echo '<br><div class="form-wraper">';
 
                     // see if there is no form if saved 
-                    if (empty($formbyid)) {
-                        echo 'To proceed, please create a form and ensure that its ID is added<a
-                    href="' . admin_url('admin.php?page=khwplist.php') . '">Go to the settings page</a>| to change the form ID
-                    value.';
-                    }
+
+                    echo '
+                        Visit the <a href="' . admin_url('admin.php?page=khwplist.php') . '"> settings page </a> to update the form ID value..';
+
 
 
                     if ($form_values) {
+
                         echo '<div class="container">';
                         echo 'Number of forms submitted: ' . $this->mydb->count_items($this->myselectedformid);
-                        echo '<br>';
-                        echo 'Default form id: ' . (($this->myselectedformid === '1') ? 'All' : $this->myselectedformid);
-                        echo ' <a style="text-align: center; color: black;"
-                               href="' . admin_url('admin.php?page=khwplist.php') . '">  Change it here</a></div>';
+
+                        if (!empty($this->myselectedformid)) {
+
+                            echo '<br> Default form id: ' . (($this->myselectedformid === '1') ? 'Show all forms' : $this->myselectedformid);
+
+                        }
+
 
                         //$role = (get_option('user_role_setting')) ? get_option('user_role_setting') : 'Admin';
                         //echo 'Who can access: ' . $role;

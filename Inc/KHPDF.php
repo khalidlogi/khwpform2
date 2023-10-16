@@ -54,6 +54,15 @@ if (!class_exists('KHPDF')) {
                     $data = $form_value['data'];
                     $prev_id = null; // Track previous ID
 
+                    error_log(print_r($data, true));
+
+                    foreach ($data as $key => $value) {
+                        if ($key === 'Name') {
+                            $html_table .= "<tr>" . $key . ": " . $value . "</tr>";
+                        }
+                    }
+
+
 
                     foreach ($data as $key => $value) {
                         //$row_class = ($id === $prev_id) ? 'same-id-row' : ''; // Add a CSS class for rows with the same ID
@@ -86,18 +95,17 @@ if (!class_exists('KHPDF')) {
                 $html_table .= "$datecsv";
 
 
-                // Set the response headers for downloading
-                header('Content-Type: text/html');
-                header('Content-Disposition: attachment; filename="form_data_table.html"');
-
                 // Output the PDF table
-                $mpdf = new \Mpdf\Mpdf();
+                $mpdf = new \Mpdf\Mpdf([
+                    'default_font_size' => 10,
+                    'default_font' => 'DejaVu'
+                ]);
                 $mpdf->WriteHTML($html_table);
 
 
                 // Set HTTP headers to force download
                 header('Content-Type: application/pdf');
-                header('Content-Disposition: attachment; filename="your_file_name.pdf"');
+                header('Content-Disposition: attachment; filename="data.pdf"');
                 $mpdf->Output();
                 //echo $html_table;
 

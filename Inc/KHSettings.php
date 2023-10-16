@@ -78,12 +78,12 @@ class KHSettings
     function wpforms_admin_notice()
     {
         ?>
-        <div class="notice notice-error">
-            <p>
-                <?php _e('WPForms plugin is not active. Please install and activate WPForms to use this plugin.', 'your-text-domain'); ?>
-            </p>
-        </div>
-        <?php
+<div class="notice notice-error">
+    <p>
+        <?php _e('WPForms plugin is not active. Please install and activate WPForms to use this plugin.', 'kh-wpforms'); ?>
+    </p>
+</div>
+<?php
     }
 
     /**
@@ -92,16 +92,16 @@ class KHSettings
     function custom_success_notice()
     {
         ?>
-        <div class="notice notice-success is-dismissible">
-            <p>
-                <?php _e('WPForms is currently active. To get started with this plugin, 
+<div class="notice notice-success is-dismissible">
+    <p>
+        <?php _e('WPForms is currently active. To get started with this plugin, 
                 you can begin by creating a form using the WPForms plugin.', 'your-text-domain'); ?>
-            </p>
-            <p>
-                <?php _e('Add shortcode: [display_form_values], into any page/post to display the entries', 'your-text-domain'); ?>
-            </p>
-        </div>
-        <?php
+    </p>
+    <p>
+        <?php _e('Add shortcode: [display_form_values], into any page/post to display the entries', 'your-text-domain'); ?>
+    </p>
+</div>
+<?php
     }
 
 
@@ -136,10 +136,10 @@ class KHSettings
         //$this->wpforms_notice();
 
         ?>
-        <div class="wrap">
-            <h1>Settings</h1>
-            <form method="post" action="options.php">
-                <?php
+<div class="wrap">
+    <h1>Settings</h1>
+    <form method="post" action="options.php">
+        <?php
                 // Output the settings fields
                 settings_fields('custom_settings_group');
                 do_settings_sections('custom-settings');
@@ -149,36 +149,36 @@ class KHSettings
                 }
 
                 ?>
-            </form>
-        </div>
-        <style>
-            .wrap {
-                max-width: 600px;
-                margin-top: 30px;
-            }
+    </form>
+</div>
+<style>
+.wrap {
+    max-width: 600px;
+    margin-top: 30px;
+}
 
-            .wrap h1 {
-                margin-bottom: 20px;
-            }
+.wrap h1 {
+    margin-bottom: 20px;
+}
 
-            .form-field {
-                margin-bottom: 20px;
-            }
+.form-field {
+    margin-bottom: 20px;
+}
 
-            .form-field label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
+.form-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
 
-            .form-field select {
-                width: 100%;
-                padding: 5px;
-                font-size: 14px;
-            }
-        </style>
+.form-field select {
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+}
+</style>
 
-        <?php
+<?php
     }
 
     // Register and initialize the settings
@@ -213,7 +213,7 @@ class KHSettings
         echo "After the initial submission of a WPForms form, 
         the form ID will be included or associated with that specific form.<br><br>";
 
-        echo "Select the wpforms' form ID:";
+        echo "<strong>Select the wpforms' form ID:</strong>";
     }
 
     // Callback function for the form ID setting field
@@ -226,13 +226,15 @@ class KHSettings
         $form_id = get_option('form_id_setting');
 
         if (empty($results_formids)) {
-            printf(__('"Oops, it appears that no forms entries  have been detected. Please consider adding a form using WPForms plugin."
+            printf(__('It appears that there are no form entries detected. Please add a form using the WPForms plugin and submit at least one form.'));
 
+            if (is_plugin_inactive('wpforms-lite/wpforms.php')) {
+                // The plugin is not activated
+                               printf(' <br>Activate wpforms-lite plugin and try again');
+            } else {
+                printf(' <br><a href="%s">Visit your WPForms forms</a>.', admin_url('admin.php?page=wpforms-overview'));
 
-
-
-            <a href="%s">your WPForms forms</a>.'), admin_url('admin.php?page=wpforms-overview'));
-
+            }
         } else {
             echo '<div class="form-field">';
             echo '<label for="form_id_setting">Form ID</label>';

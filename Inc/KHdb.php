@@ -100,7 +100,7 @@ class KHdb
         // Set the form ID to the provided value.
         $this->formid = $formid;
 
-        if ($formid === '1') {
+        if ($formid === '1' || $formid === '') {
             // If $formid is '1', select all rows.
             $query = "SELECT COUNT(DISTINCT id) FROM {$this->table_name}";
         } else {
