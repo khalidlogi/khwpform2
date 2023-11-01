@@ -9,7 +9,7 @@ echo '<div id="edit-popup" class="edit-popup draggable" style="display: none;">
             <div id="result"></div>
             <!-- Form fields go here -->
         </form>
-        <button type="submit" data-nonceupdate="' . wp_create_nonce('nonceupdate') . '" data-form-id="' . esc_attr($form_id) . '"  class="update-btn">Save</button>
+        <button type="submit" data-nonceupdate="' . wp_create_nonce('nonceupdate') . '" data-form-id="' . esc_attr($formbyid) . '"  class="update-btn">Save</button>
     </div>
 </div>';
 ?>

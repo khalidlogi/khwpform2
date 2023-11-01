@@ -1,0 +1,107 @@
+.warning-text {
+  color: #ff0000; /* Red color */
+  font-weight: bold;
+  background-color: #ffcccc; /* Light pink background */
+  border: 1px solid #ff0000; /* Red border */
+  padding: 10px;
+}
+.information-text {
+  background-color: #cce5ff; /* Change the background color as desired */
+  border: 1px solid #0066cc; /* Add a blue border for emphasis */
+  padding: 10px; /* Adjust the padding to your liking */
+  color: #0066cc; /* Set the text color to blue or your preferred color */
+  font-weight: bold; /* Make the text bold if desired */
+  margin-bottom: 12px;
+}
+.label_setting {
+  display: inline-block;
+  padding: 8px 17px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #5a84b5;
+  color: #fff;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+/* Primary label */
+.label-primary {
+  background-color: #1f2021;
+  font-size: 22px;
+  border-radius: 5%;
+  padding: 12px 55px;
+  border: 2px black solid;
+}
+primary {
+  background-color: #1f2021;
+  font-size: 22px;
+  border-radius: 5%;
+  padding: 12px 55px;
+  border: 2px black solid;
+}
+/* Custom CSS class for input fields */
+.custom-input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#form_id_setting {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #fff; /* Background color */
+  color: #333; /* Text color */
+}
+
+#form_id_setting option:checked {
+  background-color: #337ab7; /* Selected option background color */
+  color: #fff; /* Selected option text color */
+}
+
+#form_id_setting:hover {
+  border-color: #235a9d; /* Border color on hover */
+}
+
+#form_id_setting:focus {
+  border-color: #235a9d; /* Border color on focus */
+}
+/* Style the information icon */
+.my-settings-label i.fas.fa-info-circle {
+  font-size: 16px;
+  color: #0073e6; /* Change to your desired color */
+  margin-left: 5px; /* Adjust the margin to control spacing */
+  cursor: pointer;
+}
+
+/* Style the tooltip */
+.my-settings-label i.fas.fa-info-circle::after {
+  content: attr(title);
+  display: none;
+  position: absolute;
+  background-color: #0073e6; /* Tooltip background color */
+  color: #fff; /* Tooltip text color */
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 9999;
+}
+
+.my-settings-label i.fas.fa-info-circle:hover::after {
+  display: block;
+}

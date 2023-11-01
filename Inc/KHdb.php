@@ -16,6 +16,7 @@ class KHdb
     {
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'wpforms_db2';
+        $this->formid = $this->retrieve_form_id();
         //$this->count_items();
     }
 
@@ -39,7 +40,6 @@ class KHdb
                 return true;
             } else {
                 // Error occurred while dropping the table
-                error_log('Cannot delete table: ' . $wpdb->last_error); // Log the error
                 return false;
             }
         } else {
@@ -75,11 +75,10 @@ class KHdb
     function delete_data($id)
     {
         global $wpdb;
-
         // Delete the row with the specified form_id
         $wpdb->delete($this->table_name, array('id' => $id));
-
         wp_die(); // terminate immediately and return a proper response
+
     }
 
 
@@ -100,8 +99,8 @@ class KHdb
         // Set the form ID to the provided value.
         $this->formid = $formid;
 
-        if ($formid === '1' || $formid === '') {
-            // If $formid is '1', select all rows.
+        if ($formid === null) {
+            // Select all rows.
             $query = "SELECT COUNT(DISTINCT id) FROM {$this->table_name}";
         } else {
             // If $formid is provided, select rows where form_id matches.
@@ -118,6 +117,32 @@ class KHdb
         return $items_count;
     }
 
+
+    /**
+     * Function to retrieve form id from Database.
+     *
+     * @return bool True if the table is empty, false if it has data.
+     */
+    function retrieve_form_id()
+    {
+        $form_id_setting = get_option('form_id_setting');
+
+        if (is_array($form_id_setting)) {
+            $form_ids = array();
+
+            foreach ($form_id_setting as $value) {
+                if (is_numeric($value)) {
+                    $form_ids[] = $value;
+                }
+            }
+
+            $concatenated_form_id = implode(' , ', $form_ids);
+            return $concatenated_form_id;
+        } elseif (is_numeric($form_id_setting)) {
+            return $form_id_setting;
+        }
+        return NULL; // If no valid value found, return an empty string
+    }
 
     /**
      * Function to check if there is no data in a database table.
@@ -152,7 +177,7 @@ class KHdb
         global $wpdb;
         $first_date_query = $wpdb->get_var("SELECT MIN(form_date) FROM $this->table_name");
         $last_date_query = $wpdb->get_var("SELECT MAX(form_date) FROM $this->table_name");
-        $datecsv = "Initial Date: $first_date_query | Final Date:: $last_date_query";
+        $datecsv = "Initial Date: $first_date_query | Final Date: $last_date_query";
         return $datecsv;
 
     }
@@ -162,28 +187,22 @@ class KHdb
      *
      * @since 1.0.0
      */
-    public function retrieve_form_values($formid = '')
+    public function retrieve_form_values()
     {
         global $wpdb;
 
-
         // Retrieve the 'form_value' column from the database
-        if ($formid === '' || $formid === '1') {
-            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name");
-            // error_log(print_r($results, true));
+        $formid = $this->retrieve_form_id();
+        error_log('Enable_data_saving_checkbox : ' . get_option('Enable_data_saving_checkbox'));
+        if ($formid === null) {
+            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ");
         } else {
-            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id = '{$formid}'");
-            // error_log(print_r($results, true));
-        }
+            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id IN($formid)");
 
+        }
         if ($results === false) {
             error_log("SQL Error: " . $wpdb->last_error);
-        } else {
-            //error_log(print_r($results, true));
-        }
-
-        if ($results === false) {
-            echo "Database Error: " . $wpdb->last_error;
+            return false;
         }
 
         $form_values = array();
@@ -225,12 +244,8 @@ class KHdb
         $results = $wpdb->get_results("SELECT id,form_id, form_value FROM $this->table_name");
 
 
-        if ($results) {
-            error_log('get_results working');
-            //error_log(print_r($results, true)); // Log the contents of $results
-        } else {
+        if (!$results) {
             error_log('get_results working KHdb class : ' . $wpdb->last_error);
-            // error_log(print_r($results, true)); // Log the contents of $results
         }
 
 
@@ -253,5 +268,4 @@ class KHdb
 
         return $form_values;
     }
-
 }
