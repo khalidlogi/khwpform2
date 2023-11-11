@@ -165,13 +165,7 @@ class KHdb
 
     /**
      * Get the first and last date from the database.
-     *
-     * Retrieves the minimum and maximum dates from the 'form_date' column
-     * of a specified database table and returns them as a string.
-     *
-     * @return string A string containing the first and last dates.
      */
-
     function getDate()
     {
         global $wpdb;
@@ -179,7 +173,6 @@ class KHdb
         $last_date_query = $wpdb->get_var("SELECT MAX(form_date) FROM $this->table_name");
         $datecsv = "Initial Date: $first_date_query | Final Date: $last_date_query";
         return $datecsv;
-
     }
 
     /**
@@ -187,12 +180,18 @@ class KHdb
      *
      * @since 1.0.0
      */
-    public function retrieve_form_values()
+    public function retrieve_form_values($formid = '')
     {
         global $wpdb;
 
         // Retrieve the 'form_value' column from the database
-        $formid = $this->retrieve_form_id();
+        if (!empty($formid)) {
+            $formid = sanitize_text_field($formid);
+        } else {
+            $formid = $this->retrieve_form_id();
+
+        }
+
         error_log('Enable_data_saving_checkbox : ' . get_option('Enable_data_saving_checkbox'));
         if ($formid === null) {
             $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ");

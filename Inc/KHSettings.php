@@ -64,12 +64,12 @@ class KHSettings
     {
         // parameters.
         $this->page_title = esc_html__('Adas Wpforms Database Add-on', 'khwpformsdb');
-        $this->menu_title = esc_html__('Kh-Wpforms-Db', 'khwpformsdb');
+        $this->menu_title = esc_html__('Adas-Wpforms-Db-Addon', 'khwpformsdb');
         $this->capability = 'manage_options';
         $this->menu_slug = 'khwplist.php';
 
         //Add settings link
-        add_filter('plugin_action_links_kh-wpforms-db/main.php', array($this, 'khwpforms_settings_link'), 10, 2);
+        add_filter('plugin_action_links_Adas_Wpforms_Database_Add-On/main.php', array($this, 'khwpforms_settings_link'), 10, 2);
 
         $this->form_action = 'options.php';
 
@@ -79,6 +79,58 @@ class KHSettings
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'add_settings'));
         add_action('init', array($this, 'load_languages'));
+
+        $this->wpforms_notice();
+
+    }
+
+    /**
+     * Checks if WPForms plugin is active and adds custom notices accordingly.
+     */
+    public function wpforms_notice()
+    {
+        // Check if get_plugins() function exists. This is required on the front end of the
+        // site, since it is in a file that is normally only loaded in the admin.
+        if (!function_exists('get_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        if (
+            is_plugin_active('wpforms-lite/wpforms.php') || is_plugin_active('wpforms/wpforms.php')
+        ) {
+            add_action('admin_notices', array($this, 'custom_success_notice'));
+
+            error_log('wpform is_plugin_active  is active');
+        } else {
+            error_log('wpform is_plugin_active  is  not active');
+            add_action('admin_notices', array($this, 'wpforms_admin_notice'));
+
+        }
+    }
+
+    function custom_success_notice()
+    {
+        ?>
+<div class="notice notice-success is-dismissible">
+    <p>
+        <?php _e('WPForms is currently active. To get started with this plugin, 
+                you can begin by creating a form using the WPForms plugin.', 'Adas'); ?>
+    </p>
+    <p>
+        <?php _e('Add shortcode: [display_form_values], into any page/post to display the entries', 'Adas'); ?>
+    </p>
+</div>
+<?php
+    }
+    function wpforms_admin_notice()
+    {
+        ?>
+<div class="notice notice-error">
+    <p>
+        <?php _e('WPForms plugin is not active. Please install and activate WPForms to use this plugin.', 'your-text-domain'); ?>
+    </p>
+</div>
+<?php
     }
 
     function khwpforms_settings_link($links_array)
@@ -271,7 +323,9 @@ class KHSettings
         //Telegram token field
         add_settings_field(
             'telegram_token_setting',
-            __('<span class="label_setting">Token</span>', 'khwpformsdb'),
+            __('<span class="label_setting">Token  <i class="fas fa-info-circle" data-toggle="tooltip" 
+            title="To obtain a bot token, you can reach out to the @BotFather bot on Telegram. 
+            Simply send the command /newbot and follow the instructions provided."></i></span>', 'khwpformsdb'),
             array($this, 'input_token_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -288,7 +342,12 @@ class KHSettings
         //Telegram Chat_id field
         add_settings_field(
             'telegram_chat_id_setting',
-            __('<span class="label_setting">Chat ID', 'khwpformsdb'),
+            __('<span class="label_setting">Chat ID <i class="fas fa-info-circle" data-toggle="tooltip" title="
+            To obtain the chat ID for sending messages, you can contact out to the @myidbot bot on Telegram. 
+            Simply send the /getid command to get your personal chat ID. If you want to retrieve the group chat ID, 
+            invite the bot to the group and use the /getgroupid command. Group IDs typically begin with a hyphen, 
+            while supergroup IDs start with -100."
+            ></i>', 'khwpformsdb'),
             array($this, 'input_chatid_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -475,6 +534,20 @@ class KHSettings
             'khwpforms_label_color',
         );
 
+        // bg Color for export button --------------------------------------------------------.
+        add_settings_field(
+            'khwpforms_exportbg_color',
+            __('<span class="label_setting">Export button bg Color', 'khwpformsdb'),
+            array($this, 'color_exportbg_html'),
+            $this->menu_slug,
+            'cliowp_settings_page_section2'
+        );
+
+        register_setting(
+            $this->option_group,
+            'khwpforms_exportbg_color',
+        );
+
         /* WYSIWYG editor field -----------------------------------------------.
         add_settings_field(
             'cliowp_sp_editor1',
@@ -500,9 +573,7 @@ class KHSettings
     public function input_chatid_html()
     {
         $chatId = get_option('telegram_chat_id_setting');
-        echo '<label for="my_field">Enter Chat id <i class="fas fa-info-circle" data-toggle="tooltip" title="
-        To obtain the chat ID for sending messages, you can contact out to the @myidbot bot on Telegram. Simply send the /getid command to get your personal chat ID. If you want to retrieve the group chat ID, invite the bot to the group and use the /getgroupid command. Group IDs typically begin with a hyphen, while supergroup IDs start with -100."
-        ></i></label>';
+
         echo '<input class="form-control " type="text" name="telegram_chat_id_setting" value="' . esc_attr($chatId) . '" />';
     }
 
@@ -512,9 +583,6 @@ class KHSettings
     public function input_token_html()
     {
         $token = get_option('telegram_token_setting');
-        echo '<label for="my_field">Enter token <i class="fas fa-info-circle" data-toggle="tooltip" 
-        title="To obtain a bot token, you can reach out to the @BotFather bot on Telegram. Simply send the command /newbot and follow the instructions provided."></i></label>';
-
         echo '<input class="form-control" type="text" name="telegram_token_setting" value="' . esc_attr($token) . '" />';
     }
 
@@ -552,8 +620,8 @@ class KHSettings
     public function date1_html()
     {
         ?>
-        <input type="date" name="cliowp_sp_date1" value="<?php echo esc_attr(get_option('cliowp_sp_date1')); ?>">
-        <?php
+<input type="date" name="cliowp_sp_date1" value="<?php echo esc_attr(get_option('cliowp_sp_date1')); ?>">
+<?php
     }
 
     /**
@@ -562,9 +630,9 @@ class KHSettings
     public function datetime1_html()
     {
         ?>
-        <input type="datetime-local" name="cliowp_sp_datetime1"
-            value="<?php echo esc_attr(get_option('cliowp_sp_datetime1')); ?>">
-        <?php
+<input type="datetime-local" name="cliowp_sp_datetime1"
+    value="<?php echo esc_attr(get_option('cliowp_sp_datetime1')); ?>">
+<?php
     }
 
     /**
@@ -577,8 +645,8 @@ class KHSettings
     public function password1_html()
     {
         ?>
-        <input class="form-control " type="password" name="cliowp_sp_password1" value="">
-        <?php
+<input class="form-control " type="password" name="cliowp_sp_password1" value="">
+<?php
     }
 
     /**
@@ -638,18 +706,18 @@ class KHSettings
     public function select1_html()
     {
         ?>
-        <select name="cliowp_sp_select1">
-            <option value="1" <?php selected(get_option('cliowp_sp_select1'), '1'); ?>>
-                <?php esc_attr_e('Option1', 'khwpformsdb'); ?>
-            </option>
-            <option value="2" <?php selected(get_option('cliowp_sp_select1'), '2'); ?>>
-                <?php esc_attr_e('Option2', 'khwpformsdb'); ?>
-            </option>
-            <option value="3" <?php selected(get_option('cliowp_sp_select1'), '3'); ?>>
-                <?php esc_attr_e('Option3', 'khwpformsdb'); ?>
-            </option>
-        </select>
-        <?php
+<select name="cliowp_sp_select1">
+    <option value="1" <?php selected(get_option('cliowp_sp_select1'), '1'); ?>>
+        <?php esc_attr_e('Option1', 'khwpformsdb'); ?>
+    </option>
+    <option value="2" <?php selected(get_option('cliowp_sp_select1'), '2'); ?>>
+        <?php esc_attr_e('Option2', 'khwpformsdb'); ?>
+    </option>
+    <option value="3" <?php selected(get_option('cliowp_sp_select1'), '3'); ?>>
+        <?php esc_attr_e('Option3', 'khwpformsdb'); ?>
+    </option>
+</select>
+<?php
     }
 
     /**
@@ -677,8 +745,9 @@ class KHSettings
     public function checkbox1_html()
     {
         ?>
-        <input class="form-control " type="checkbox" name="Enable_data_saving_checkbox" value="1" <?php checked(get_option('Enable_data_saving_checkbox'), '1'); ?>>
-        <?php
+<input class="form-control " type="checkbox" name="Enable_data_saving_checkbox" value="1"
+    <?php checked(get_option('Enable_data_saving_checkbox'), '1'); ?>>
+<?php
     }
 
     /**
@@ -687,8 +756,9 @@ class KHSettings
     public function checkbox2_html()
     {
         ?>
-        <input class="my-custom-checkbox" type="checkbox" name="Enable_notification_checkbox" value="1" <?php checked(get_option('Enable_notification_checkbox'), '1'); ?>>
-        <?php
+<input class="my-custom-checkbox" type="checkbox" name="Enable_notification_checkbox" value="1"
+    <?php checked(get_option('Enable_notification_checkbox'), '1'); ?>>
+<?php
     }
 
     /**
@@ -705,16 +775,16 @@ class KHSettings
             $selected_values = get_option('form_id_setting');
             ?>
 
-            <?php
+<?php
             //esc_attr_e('<h1><</h1>', 'khwpformsdb');
-            $message = sprintf(esc_html__('To select multiple IDs, press and hold the Ctrl button while selecting the desired IDs.'));
+            $message = sprintf(esc_html__('To select multiple IDs, press and hold the Ctrl button while selecting IDs.'));
             $html_message = sprintf('<div class="information-text">%s</div>', wpautop($message));
             echo wp_kses_post($html_message); ?>
 
-            </option>
+</option>
 
-            <select name="form_id_setting[]" multiple>
-                <?php
+<select name="form_id_setting[]" multiple>
+    <?php
                 foreach ($results_formids as $form_id) {
                     //error_log(print_r($form_id, true));
                     $option_value = esc_attr($form_id->form_id);
@@ -723,9 +793,9 @@ class KHSettings
                 Form ID: $option_value</option>";
                 }
                 ?>
-            </select>
+</select>
 
-        <?php } else {
+<?php } else {
 
             /* translators: %s: PHP version */
             $message = sprintf(esc_html__('Currently, no data has been submitted. Kindly submit at least one form.'));
@@ -760,9 +830,9 @@ class KHSettings
     public function textarea1_html(array $args)
     {
         ?>
-        <textarea name="cliowp_sp_textarea1" rows="<?php echo esc_html($args['rows']); ?>"
-            cols="<?php echo esc_html($args['cols']); ?>"><?php echo esc_attr(get_option('cliowp_sp_textarea1')); ?></textarea>
-        <?php
+<textarea name="cliowp_sp_textarea1" rows="<?php echo esc_html($args['rows']); ?>"
+    cols="<?php echo esc_html($args['cols']); ?>"><?php echo esc_attr(get_option('cliowp_sp_textarea1')); ?></textarea>
+<?php
     }
 
     /**
@@ -771,8 +841,8 @@ class KHSettings
     public function color1_html()
     {
         ?>
-        <input type="color" name="khwpforms_bg_color" value="<?php echo esc_attr(get_option('khwpforms_bg_color')); ?>">
-        <?php
+<input type="color" name="khwpforms_bg_color" value="<?php echo esc_attr(get_option('khwpforms_bg_color')); ?>">
+<?php
     }
 
     /**
@@ -781,8 +851,8 @@ class KHSettings
     public function color_html2()
     {
         ?>
-        <input type="color" name="khwpforms_text_color" value="<?php echo esc_attr(get_option('khwpforms_text_color')); ?>">
-        <?php
+<input type="color" name="khwpforms_text_color" value="<?php echo esc_attr(get_option('khwpforms_text_color')); ?>">
+<?php
     }
 
     /**
@@ -791,8 +861,19 @@ class KHSettings
     public function color_html3()
     {
         ?>
-        <input type="color" name="khwpforms_label_color" value="<?php echo esc_attr(get_option('khwpforms_label_color')); ?>">
-        <?php
+<input type="color" name="khwpforms_label_color" value="<?php echo esc_attr(get_option('khwpforms_label_color')); ?>">
+<?php
+    }
+
+    /**
+     * Create HTML for label color field
+     */
+    public function color_exportbg_html()
+    {
+        ?>
+<input type="color" name="khwpforms_exportbg_color"
+    value="<?php echo esc_attr(get_option('khwpforms_exportbg_color')); ?>">
+<?php
     }
 
     /**
@@ -813,20 +894,20 @@ class KHSettings
     {
         ?>
 
-        <div class="wrap">
-            <h1>
-                <?php echo esc_attr($this->page_title); ?>
-            </h1>
-            <form action="<?php echo esc_attr($this->form_action); ?>" method="POST">
-                <?php
+<div class="wrap">
+    <h1>
+        <?php echo esc_attr($this->page_title); ?>
+    </h1>
+    <form action="<?php echo esc_attr($this->form_action); ?>" method="POST">
+        <?php
                 settings_fields($this->option_group);
                 do_settings_sections($this->menu_slug);
                 submit_button();
                 ?>
-            </form>
-        </div>
+    </form>
+</div>
 
-        <?php
+<?php
     }
 
     /**

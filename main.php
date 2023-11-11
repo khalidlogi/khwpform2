@@ -1,7 +1,7 @@
 <?php
 
 /*
-Plugin Name: Adas ^ Wpforms Database Add-On 
+Plugin Name: Adas_Wpforms_Database_Add-On 
 Description: Enhance WPForms with a powerful database feature for effortless storage and organization of form submissions.
 Version: 1.0
 Author: Khalidlogi
@@ -11,6 +11,7 @@ Text Domain: adas
 
 // to do 
 // if fiels admin exist, skip admin field 
+// remove ini_set('display_errors', 1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -37,6 +38,8 @@ if (!class_exists('KHMYCLASS')) {
         private $text_color;
         private $label_color;
         private $bgcolor;
+
+        private $exportbgcolor;
         private $isdataenabled;
         private $isnotif;
 
@@ -50,7 +53,6 @@ if (!class_exists('KHMYCLASS')) {
 
             // Hooks and Actions
             $this->regsiter_hooks();
-            add_action('wpforms_frontend_confirmation_message_after', array($this, 'redirect_action'), 10, 4);
             add_shortcode('display_form_values', array($this, 'display_form_values_shortcode'));
             add_action('wp_enqueue_scripts', array($this, 'enqueue_form_values_css'));
             add_action('admin_enqueue_scripts', array($this, 'enqueue_font_awesome'));
@@ -71,8 +73,26 @@ if (!class_exists('KHMYCLASS')) {
 
             // Other actions
             // add_filter('login_redirect', array($this, 'custom_login_redirect'), 10, 3);
+            add_action('wp_login', array($this, 'redirect_to_saved_url'));
+
         }
 
+
+
+        // Redirect users to the saved URL upon login
+        function redirect_to_saved_url()
+        {
+            $saved_url = get_option('saved_url');
+            if (!empty($saved_url)) {
+                //$login_url = wp_login_url(add_query_arg('redirect', 'specific_value'));
+                $redirect_param = isset($_GET['redirect']) ? $_GET['redirect'] : '';
+                if ($redirect_param === 'specific_value') {
+                    delete_option('saved_url');
+                    wp_redirect($saved_url);
+                    exit;
+                }
+            }
+        }
 
         /* Translation */
         public function kh_wpfdb_load_textdomain()
@@ -175,7 +195,6 @@ if (!class_exists('KHMYCLASS')) {
         }
 
 
-
         /**
          * Setup plugin constants.
          *
@@ -200,10 +219,10 @@ if (!class_exists('KHMYCLASS')) {
                 define('KHFORM_PATH', plugin_dir_path(__FILE__));
             }
 
-            // Plugin Folder URL.
+            /* Plugin Folder URL.
             if (!defined('WPFORMS_PLUGIN_URL')) {
                 define('KHFORM_URL', plugin_dir_url(__FILE__));
-            }
+            }*/
 
             //table name wpforms_db2
             $this->table_name = $wpdb->prefix . 'wpforms_db2';
@@ -211,6 +230,7 @@ if (!class_exists('KHMYCLASS')) {
             $this->label_color = get_option('khwpforms_label_color');
             $this->text_color = get_option('khwpforms_text_color');
             $this->bgcolor = get_option('khwpforms_bg_color');
+            $this->exportbgcolor = get_option('khwpforms_exportbg_color');
             $this->isdataenabled = get_option('Enable_data_saving_checkbox');
             $this->isnotif = get_option('Enable_notification_checkbox');
         }
@@ -385,6 +405,14 @@ if (!class_exists('KHMYCLASS')) {
         function display_form_values_shortcode($atts)
         {
             global $wpdb;
+            $atts = shortcode_atts(
+                array(
+                    'id' => '',
+                ),
+                $atts
+            );
+
+
 
             // see if user do not have authorization 
             if (!current_user_can('manage_options')) {
@@ -392,18 +420,23 @@ if (!class_exists('KHMYCLASS')) {
 
                 ob_start();
 
-                echo '<div style="text-align: center; color: red;">You are not authorized to access this page.<a href="' . wp_login_url() . '">  Login</div>';
-                //echo 'login: ' . wp_login_url();
+                echo '<div style="text-align: center; color: red;">You are not authorized to access this page. <a href="' . wp_login_url(add_query_arg('redirect', 'wpfurl')) . '">Login</a></div>';                //echo 'login: ' . wp_login_url();
 
                 return ob_get_clean();
 
             } else {
 
                 //get the form id
-                $formbyid = $this->mydb->retrieve_form_id();
+                if (!empty($atts['id'])) {
+                    $formbyid = $atts['id'];
+                } else {
+                    $formbyid = $this->mydb->retrieve_form_id();
+
+                }
+
                 error_log('display the changed form id' . $formbyid);
                 // retrieve form values
-                $form_values = $this->mydb->retrieve_form_values();
+                $form_values = $this->mydb->retrieve_form_values($formbyid);
 
                 //Check if there is at least one entry
                 if ($this->mydb->is_table_empty() === true) {
@@ -483,8 +516,8 @@ if (!class_exists('KHMYCLASS')) {
                             echo '</div>';
                         }
 
-                        echo '<button class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
-                        echo '<button class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
+                        echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
+                        echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
 
                         echo '</div>';
                         echo '</div>';
@@ -505,6 +538,11 @@ if (!class_exists('KHMYCLASS')) {
         {
 
             global $wpdb;
+
+            $current_url = get_permalink();
+
+            update_option('saved_url', $current_url);
+
             error_log('process_entry activated');
             // Obviously we need to have form fields to proceed.
             if (empty($fields)) {
