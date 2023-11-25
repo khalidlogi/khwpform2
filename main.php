@@ -1,7 +1,7 @@
 <?php
 
 /*
-Plugin Name: Adas ^ Wpforms Database Add-On 
+Plugin Name: Adas_Wpforms_Database_Add-On 
 Description: Enhance WPForms with a powerful database feature for effortless storage and organization of form submissions.
 Version: 1.0
 Author: Khalidlogi
@@ -11,6 +11,7 @@ Text Domain: adas
 
 // to do 
 // if fiels admin exist, skip admin field 
+// remove ini_set('display_errors', 1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -37,6 +38,8 @@ if (!class_exists('KHMYCLASS')) {
         private $text_color;
         private $label_color;
         private $bgcolor;
+
+        private $exportbgcolor;
         private $isdataenabled;
         private $isnotif;
 
@@ -50,7 +53,6 @@ if (!class_exists('KHMYCLASS')) {
 
             // Hooks and Actions
             $this->regsiter_hooks();
-            add_action('wpforms_frontend_confirmation_message_after', array($this, 'redirect_action'), 10, 4);
             add_shortcode('display_form_values', array($this, 'display_form_values_shortcode'));
             add_action('wp_enqueue_scripts', array($this, 'enqueue_form_values_css'));
             add_action('admin_enqueue_scripts', array($this, 'enqueue_font_awesome'));
@@ -62,17 +64,36 @@ if (!class_exists('KHMYCLASS')) {
             if ($this->isdataenabled === '1') {
                 add_action('wpforms_process_entry_save', array($this, 'process_entry'), 10, 4);
             }
-            add_action('wp_ajax_update_form_values', array($this, 'update_form_values'));
-            add_action('wp_ajax_nopriv_update_form_values', array($this, 'update_form_values'));
-            add_action('wp_ajax_get_form_values', array($this, 'get_form_values'));
-            add_action('wp_ajax_nopriv_get_form_values', array($this, 'get_form_values'));
-            add_action('wp_ajax_delete_form_row', array($this, 'delete_form_row'));
-            add_action('wp_ajax_nopriv_delete_form_row', array($this, 'delete_form_row'));
+
 
             // Other actions
             // add_filter('login_redirect', array($this, 'custom_login_redirect'), 10, 3);
+            add_action('wp_login', array($this, 'redirect_to_saved_url'));
+
+
+
+
         }
 
+
+
+
+
+
+        // Redirect users to the saved URL upon login
+        function redirect_to_saved_url()
+        {
+            $saved_url = get_option('saved_url');
+            if (!empty($saved_url)) {
+                $redirect_param = isset($_GET['redirect']) ? $_GET['redirect'] : '';
+                $paged_param = isset($_GET['paged']) ? $_GET['paged'] : ''; // Check for 'paged' parameter
+                if ($redirect_param === 'specific_value' && empty($paged_param)) {
+                    delete_option('saved_url');
+                    wp_redirect($saved_url);
+                    exit;
+                }
+            }
+        }
 
         /* Translation */
         public function kh_wpfdb_load_textdomain()
@@ -159,6 +180,9 @@ if (!class_exists('KHMYCLASS')) {
             include_once KHFORM_PATH . 'Inc/KHSettings.php';
             include_once KHFORM_PATH . 'Inc/KHPDF.php';
             include_once KHFORM_PATH . 'Inc/KHdb.php';
+            include_once KHFORM_PATH . 'Inc/AjaxClass.php';
+            include_once KHFORM_PATH . 'Inc/KHwidget.php';
+
         }
 
         /**
@@ -173,7 +197,6 @@ if (!class_exists('KHMYCLASS')) {
 
 
         }
-
 
 
         /**
@@ -200,10 +223,10 @@ if (!class_exists('KHMYCLASS')) {
                 define('KHFORM_PATH', plugin_dir_path(__FILE__));
             }
 
-            // Plugin Folder URL.
+            /* Plugin Folder URL.
             if (!defined('WPFORMS_PLUGIN_URL')) {
                 define('KHFORM_URL', plugin_dir_url(__FILE__));
-            }
+            }*/
 
             //table name wpforms_db2
             $this->table_name = $wpdb->prefix . 'wpforms_db2';
@@ -211,6 +234,7 @@ if (!class_exists('KHMYCLASS')) {
             $this->label_color = get_option('khwpforms_label_color');
             $this->text_color = get_option('khwpforms_text_color');
             $this->bgcolor = get_option('khwpforms_bg_color');
+            $this->exportbgcolor = get_option('khwpforms_exportbg_color');
             $this->isdataenabled = get_option('Enable_data_saving_checkbox');
             $this->isnotif = get_option('Enable_notification_checkbox');
         }
@@ -376,6 +400,135 @@ if (!class_exists('KHMYCLASS')) {
         }
 
 
+        function display_form_values_shortcode2($atts)
+        {
+            global $wpdb;
+            $atts = shortcode_atts(
+                array(
+                    'id' => '',
+                ),
+                $atts
+            );
+
+            // Pagination logic
+            $current_page = max(1, get_query_var('paged'));
+
+            $items_per_page = get_option('number_id_setting');
+            if (empty($items_per_page)) {
+                $items_per_page = 10;
+            }
+            $offset = ($current_page - 1) * $items_per_page;
+
+            // see if user do not have authorization 
+            if (!current_user_can('manage_options')) {
+                // Assuming you have a link that takes users to the login page, you can add the referer URL as a query parameter.
+
+                ob_start();
+
+                echo '<div style="text-align: center; color: red;">You are not authorized to access this page. <a href="' . wp_login_url(add_query_arg('redirect', 'wpfurl')) . '">Login</a></div>';                //echo 'login: ' . wp_login_url();
+
+                return ob_get_clean();
+
+            } else {
+
+                //get the form id
+                if (!empty($atts['id'])) {
+                    $formbyid = $atts['id'];
+                } else {
+                    $formbyid = KHdb::getInstance()->retrieve_form_id();
+
+                }
+
+                error_log('display the changed form id' . $formbyid);
+                // retrieve form values
+                $form_values = KHdb::getInstance()->retrieve_form_values($formbyid, $offset, $items_per_page);
+
+                //Check if there is at least one entry
+                if (KHdb::getInstance()->is_table_empty() === true) {
+                    ob_start();
+
+                    echo '<div style="text-align: center; color: red;">No data available! Please add entries to your form and try again.';
+                    echo ' <a style="text-align: center; color: black;" href="' . admin_url('admin.php?page=khwplist.php') . '">Settings
+                    DB</a></div>';
+
+                    return ob_get_clean();
+
+                } else {
+                    ob_start();
+
+                    //include edit-form file
+                    include_once KHFORM_PATH . 'Inc/html/edit_popup.php';
+                    // Start table
+                    echo '<table style="border: 1px solid black;">';
+
+                    // Table header
+                    echo '<tr>';
+                    echo '<th>ID</th>';
+                    echo '<th>Form ID</th>';
+                    echo '<th>Data</th>';
+                    echo '</tr>';
+
+                    foreach ($form_values as $form_value) {
+                        $form_id = intval($form_value['form_id']);
+                        $id = intval($form_value['id']);
+
+                        // Table row
+                        echo '<tr style="border: 1px solid black;" >';
+                        echo '<td style="border: 1px solid black;  padding: 10px; text-align: center;">' . $id . '</td>';
+                        echo '<td style="border: 1px solid black;  padding: 10px; text-align: center;">' . $form_id . '</td>';
+                        echo '<td style="border: 1px solid black;">';
+
+                        // Table data
+                        foreach ($form_value['data'] as $key => $value) {
+                            if (empty($value)) {
+                                continue;
+                            }
+
+                            echo '<div>';
+                            echo '<span>' . $key . ': </span>';
+                            echo '<span>' . $value . ' </span>';
+
+                            echo '</div>';
+                        }
+
+                        echo '<button class="deletebtn" data-form-id="' . esc_attr($id) . '" data-nonce="' . wp_create_nonce('ajax-nonce') . '">
+                        <i class="fas fa-trash"></i></button>';
+                        //<button class="delete-btn" data-form-id="' . esc_attr($id) . '"
+                        //data-nonce="' . wp_create_nonce('ajax-nonce') . '">
+                        //<i class="fas fa-trash"></i></button>
+                        echo '<button class="editbtn" 
+                        data-form-id="' . esc_attr($form_id) . '" data-id="' . esc_attr($id) . '"><i
+                        class="fas fa-edit"></i></button>';
+
+                        echo '</td>';
+                        echo '</tr>';
+                    }
+
+                    // End table
+                    echo '</table>';
+
+                    // Pagination link
+                    echo paginate_links(
+                        array(
+                            'base' => esc_url(add_query_arg('paged', '%#%')),
+                            'format' => '',
+                            'prev_text' => __('&laquo; Previous'),
+                            'next_text' => __('Next &raquo;'),
+                            'total' => ceil($wpdb->get_var("SELECT COUNT(id) FROM $this->table_name ") / $items_per_page),
+                            'current' => $current_page,
+                        )
+                    );
+
+                    echo '<br>';
+                    echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
+                    echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
+
+                    return ob_get_clean();
+                }
+            }
+        }
+
+
         /**
          * display form values shortcode
          *
@@ -385,6 +538,22 @@ if (!class_exists('KHMYCLASS')) {
         function display_form_values_shortcode($atts)
         {
             global $wpdb;
+            $atts = shortcode_atts(
+                array(
+                    'id' => '',
+                ),
+                $atts
+            );
+
+            // Pagination logic
+            $current_page = max(1, get_query_var('paged'));
+
+            $items_per_page = get_option('number_id_setting');
+            error_log('items_per_page' . $items_per_page);
+            if (empty($items_per_page)) {
+                $items_per_page = 10;
+            }
+            $offset = ($current_page - 1) * $items_per_page;
 
             // see if user do not have authorization 
             if (!current_user_can('manage_options')) {
@@ -392,21 +561,26 @@ if (!class_exists('KHMYCLASS')) {
 
                 ob_start();
 
-                echo '<div style="text-align: center; color: red;">You are not authorized to access this page.<a href="' . wp_login_url() . '">  Login</div>';
-                //echo 'login: ' . wp_login_url();
+                echo '<div style="text-align: center; color: red;">You are not authorized to access this page. <a href="' . wp_login_url(add_query_arg('redirect', 'wpfurl')) . '">Login</a></div>';                //echo 'login: ' . wp_login_url();
 
                 return ob_get_clean();
 
             } else {
 
                 //get the form id
-                $formbyid = $this->mydb->retrieve_form_id();
+                // if (!empty($atts['id'])) {
+                //   $formbyid = $atts['id'];
+                //} else {
+                $formbyid = KHdb::getInstance()->retrieve_form_id();
+
+                //}
+
                 error_log('display the changed form id' . $formbyid);
                 // retrieve form values
-                $form_values = $this->mydb->retrieve_form_values();
+                $form_values = KHdb::getInstance()->retrieve_form_values($formbyid, $offset, $items_per_page);
 
                 //Check if there is at least one entry
-                if ($this->mydb->is_table_empty() === true) {
+                if (KHdb::getInstance()->is_table_empty() === true) {
                     ob_start();
 
                     echo '<div style="text-align: center; color: red;">No data available! Please add etries to your form and try again.';
@@ -435,7 +609,7 @@ if (!class_exists('KHMYCLASS')) {
 
                     if ($form_values) {
                         echo '<div class="container">';
-                        echo 'Number of forms submitted: ' . $this->mydb->count_items($formbyid);
+                        echo 'Number of forms submitted: ' . KHdb::getInstance()->count_items($formbyid);
                         if (!empty($formbyid)) {
                             echo '<br> Default form id: ' . (($formbyid === '1') ? 'Show all forms' : $formbyid);
                         }
@@ -483,8 +657,21 @@ if (!class_exists('KHMYCLASS')) {
                             echo '</div>';
                         }
 
-                        echo '<button class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
-                        echo '<button class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
+                        //Pagination link
+                        echo paginate_links(
+                            array(
+                                'base' => esc_url(add_query_arg('paged', '%#%')),
+                                'format' => '',
+                                'prev_text' => __('&laquo; Previous'),
+                                'next_text' => __('Next &raquo;'),
+                                'total' => ceil($wpdb->get_var("SELECT COUNT(id) FROM $this->table_name ") / $items_per_page),
+                                'current' => $current_page,
+                            )
+                        );
+
+                        echo '<br>';
+                        echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';
+                        echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn-pdf"><i class="fas fa-download"></i> Export as PDF</button>';
 
                         echo '</div>';
                         echo '</div>';
@@ -504,7 +691,13 @@ if (!class_exists('KHMYCLASS')) {
         function process_entry($fields, $entry, $form_data, $entry_id)
         {
 
+
             global $wpdb;
+
+            $current_url = get_permalink();
+
+            update_option('saved_url', $current_url);
+
             error_log('process_entry activated');
             // Obviously we need to have form fields to proceed.
             if (empty($fields)) {

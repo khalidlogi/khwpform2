@@ -25,11 +25,12 @@
 }
 /* Primary label */
 .label-primary {
-  background-color: #1f2021;
-  font-size: 22px;
+  font-size: 19px;
   border-radius: 5%;
-  padding: 12px 55px;
-  border: 2px black solid;
+  width: 192px;
+  text-align: center;
+  color: beige;
+  background: #c21d1d;
 }
 primary {
   background-color: #1f2021;

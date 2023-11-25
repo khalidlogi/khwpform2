@@ -9,7 +9,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-The Kh-Wpforms-Db plugin is an add-on for WPForms that enhances its functionality by providing a powerful database feature. With this plugin, you can easily store, organize, and manage your WPForms submissions while keeping your form data secure. Additionally, you can stay updated by using Telegram notifications.
+The Adas Wpforms Database Add-on plugin is an add-on for WPForms that enhances its functionality by providing a powerful database feature. With this plugin, you can easily store, organize, and manage your WPForms submissions while keeping your form data secure. Additionally, you can stay updated by using Telegram notifications.
 
 == Key Features ==
 
@@ -19,10 +19,11 @@ The Kh-Wpforms-Db plugin is an add-on for WPForms that enhances its functionalit
 - **Edit and Delete Submissions**: You can edit and delete form data as needed, maintaining accurate records.
 - **Admin Notes**: Add important notes or comments to form submissions for better data management and collaboration.
 - **Telegram notifications **: Activate Telegram notifications to receive real-time notifications for every form submission.
+- **Customisation **: Personalize the appearance of theVisualized data by adjusting color schemes and background colors through the settings page.
 
 == Installation ==
 
-1. Download the Kh-Wpforms-Db plugin ZIP file.
+1. Download the Adas Wpforms Database Add-on plugin ZIP file.
 2. Log in to your WordPress admin dashboard.
 3. Navigate to **Plugins > Add New**.
 4. Click on the **Upload Plugin** button.
@@ -46,7 +47,7 @@ Yes, you can export all form entries as CSV or PDF files for further analysis, s
 
 = Can I use this plugin on multiple forms simultaneously? =
 
-Yes, you can use the Kh-Wpforms-Db plugin on multiple forms on your WordPress site. Each form's submissions will be stored with its relevant `form_id`, allowing you to organize and manage submissions for different forms independently.
+Yes, you can use the Adas Wpforms Database Add-on plugin on multiple forms on your WordPress site. Each form's submissions will be stored with its relevant `form_id`, allowing you to organize and manage submissions for different forms independently.
 
 = Is there a limit to the number of submissions I can store with this plugin? =
 
@@ -64,4 +65,4 @@ If you encounter any issues or have questions regarding the Kh-Wpforms-Db plugin
 
 == License ==
 
-The Kh-Wpforms-Db plugin is licensed under the GPLv2 or later license.
+The Adas Wpforms Database Add-on plugin is licensed under the GPLv2 or later license.

@@ -11,7 +11,7 @@ class KHdb
 
     protected $table_name;
     private $formid;
-
+    private static $instance;
     public function __construct()
     {
         global $wpdb;
@@ -144,6 +144,29 @@ class KHdb
         return NULL; // If no valid value found, return an empty string
     }
 
+
+    /**
+     * Function to retrieve last three dates.
+     *
+     * @return bool True if the table is empty, false if it has data.
+     */
+    public static function get_last_three_dates()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'wpforms_db2';
+        $query = "SELECT DISTINCT form_date FROM {$table} ORDER BY form_date DESC LIMIT 3";
+        $results = $wpdb->get_results($query);
+
+        $dates = array();
+        foreach ($results as $result) {
+            $dates[] = $result->form_date;
+        }
+
+        return $dates;
+    }
+
+
+
     /**
      * Function to check if there is no data in a database table.
      *
@@ -165,13 +188,7 @@ class KHdb
 
     /**
      * Get the first and last date from the database.
-     *
-     * Retrieves the minimum and maximum dates from the 'form_date' column
-     * of a specified database table and returns them as a string.
-     *
-     * @return string A string containing the first and last dates.
      */
-
     function getDate()
     {
         global $wpdb;
@@ -179,7 +196,6 @@ class KHdb
         $last_date_query = $wpdb->get_var("SELECT MAX(form_date) FROM $this->table_name");
         $datecsv = "Initial Date: $first_date_query | Final Date: $last_date_query";
         return $datecsv;
-
     }
 
     /**
@@ -187,19 +203,41 @@ class KHdb
      *
      * @since 1.0.0
      */
-    public function retrieve_form_values()
+    public function retrieve_form_values($formid = '', $offset = '', $items_per = '')
     {
+
+        // $wpdb->get_results("SELECT * FROM $this->table_name LIMIT $offset, $items_per_page");
+
         global $wpdb;
 
-        // Retrieve the 'form_value' column from the database
-        $formid = $this->retrieve_form_id();
-        error_log('Enable_data_saving_checkbox : ' . get_option('Enable_data_saving_checkbox'));
-        if ($formid === null) {
-            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ");
+        if (!empty($items_per)) {
+            $items_per_page = $items_per;
         } else {
-            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id IN($formid)");
+            $items_per_page = (get_option('number_id_setting')) ?: '10';
+        }
+
+        // Retrieve the 'form_value' column from the database
+        if (!empty($formid)) {
+            $formid = sanitize_text_field($formid);
+        } else {
+            $formid = $this->retrieve_form_id();
 
         }
+
+        //$wpdb->get_results("SELECT * FROM $this->table_name LIMIT $offset, $items_per_page");
+        //error_log('Enable_data_saving_checkbox : ' . get_option('Enable_data_saving_checkbox'));
+
+        if (empty($items_per)) {
+            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ");
+        } else {
+            if ($formid === null) {
+                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  LIMIT  $offset, $items_per_page ");
+            } else {
+                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id IN($formid) 
+                LIMIT  $offset, $items_per_page");
+            }
+        }
+
         if ($results === false) {
             error_log("SQL Error: " . $wpdb->last_error);
             return false;
@@ -268,4 +306,15 @@ class KHdb
 
         return $form_values;
     }
+
+    // Static method to get the instance of the class
+    public static function getInstance()
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
 }
+
+KHdb::getInstance();

@@ -70,7 +70,7 @@ jQuery(document).ready(function ($) {
     });
   });
 
-  $(".edit-btn").on("click", function () {
+  $(".edit-btn, .editbtn").on("click", function () {
     var form_id = $(this).data("form-id");
     var id = $(this).data("id");
     console.log("Form ID:", form_id);
@@ -96,8 +96,13 @@ jQuery(document).ready(function ($) {
             `<label  id='myid' data-id='${id}'>Form id: ${id}</label>`
           );
 
+          console.log(fields);
           // Populate inputs with fetched fields
+          var isAminField = false;
           $.each(fields, function (index, field) {
+            if (field.name === "Admin_note") {
+              isAminField = true;
+            }
             var input = $("<input>", {
               type: field.type,
               name: field.name,
@@ -116,7 +121,8 @@ jQuery(document).ready(function ($) {
             //$("#update-btn").html('<i class="fas fa-check"></i> Checked');
             $(this).html('<i class="fas fa-check"></i> Checked');
           });
-          var input2 = $("<input>", {
+
+          var inputAdmin = $("<input>", {
             type: "text",
             name: "Admin note",
             class: "input-large",
@@ -124,7 +130,9 @@ jQuery(document).ready(function ($) {
             placeholder: "Admin note",
             style: "color: red;",
           });
-          $("#edit-form").append(input2);
+          if (!isAminField) {
+            $("#edit-form").append(inputAdmin);
+          }
 
           // Show the edit popup form
           $("#edit-popup").show();
@@ -161,7 +169,7 @@ jQuery(document).ready(function ($) {
     window.location.href = custom_vars.ajax_url + "?" + $.param(data);
   });
 
-  $(".delete-btn").on("click", function () {
+  $(".delete-btn, .deletebtn").on("click", function () {
     var form_id = $(this).data("form-id");
     var id = $(this).data("form-id");
     var nonce = $(this).data("nonce");

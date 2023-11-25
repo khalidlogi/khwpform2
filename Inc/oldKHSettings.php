@@ -100,7 +100,7 @@ class KHSettings
         ) {
             add_action('admin_notices', array($this, 'custom_success_notice'));
 
-            //error_log('wpform is_plugin_active  is active');
+            // error_log('wpform is_plugin_active  is active');
         } else {
             error_log('wpform is_plugin_active  is  not active');
             add_action('admin_notices', array($this, 'wpforms_admin_notice'));
@@ -111,26 +111,26 @@ class KHSettings
     function custom_success_notice()
     {
         ?>
-<div class="notice notice-success is-dismissible">
-    <p>
-        <?php _e('WPForms is currently active. To get started with this plugin, 
+        <div class="notice notice-success is-dismissible">
+            <p>
+                <?php _e('WPForms is currently active. To get started with this plugin, 
                 you can begin by creating a form using the WPForms plugin.', 'Adas'); ?>
-    </p>
-    <p>
-        <?php _e('Add shortcode: [display_form_values], into any page/post to display the entries', 'Adas'); ?>
-    </p>
-</div>
-<?php
+            </p>
+            <p>
+                <?php _e('Add shortcode: [display_form_values], into any page/post to display the entries', 'Adas'); ?>
+            </p>
+        </div>
+        <?php
     }
     function wpforms_admin_notice()
     {
         ?>
-<div class="notice notice-error">
-    <p>
-        <?php _e('WPForms plugin is not active. Please install and activate WPForms to use this plugin.', 'your-text-domain'); ?>
-    </p>
-</div>
-<?php
+        <div class="notice notice-error">
+            <p>
+                <?php _e('WPForms plugin is not active. Please install and activate WPForms to use this plugin.', 'your-text-domain'); ?>
+            </p>
+        </div>
+        <?php
     }
 
     function khwpforms_settings_link($links_array)
@@ -318,20 +318,6 @@ class KHSettings
         register_setting(
             $this->option_group,
             'form_id_setting',
-        );
-
-        // Number of entries in page --------------------------------------------------.
-        add_settings_field(
-            'number_id_setting',
-            __('<span class="label_setting">Number of entries per Page', 'khwpformsdb'),
-            array($this, 'number_page_html'),
-            $this->menu_slug,
-            'cliowp_settings_page_section1'
-        );
-
-        register_setting(
-            $this->option_group,
-            'number_id_setting',
         );
 
         //Telegram token field
@@ -634,8 +620,8 @@ class KHSettings
     public function date1_html()
     {
         ?>
-<input type="date" name="cliowp_sp_date1" value="<?php echo esc_attr(get_option('cliowp_sp_date1')); ?>">
-<?php
+        <input type="date" name="cliowp_sp_date1" value="<?php echo esc_attr(get_option('cliowp_sp_date1')); ?>">
+        <?php
     }
 
     /**
@@ -644,9 +630,9 @@ class KHSettings
     public function datetime1_html()
     {
         ?>
-<input type="datetime-local" name="cliowp_sp_datetime1"
-    value="<?php echo esc_attr(get_option('cliowp_sp_datetime1')); ?>">
-<?php
+        <input type="datetime-local" name="cliowp_sp_datetime1"
+            value="<?php echo esc_attr(get_option('cliowp_sp_datetime1')); ?>">
+        <?php
     }
 
     /**
@@ -659,8 +645,8 @@ class KHSettings
     public function password1_html()
     {
         ?>
-<input class="form-control " type="password" name="cliowp_sp_password1" value="">
-<?php
+        <input class="form-control " type="password" name="cliowp_sp_password1" value="">
+        <?php
     }
 
     /**
@@ -720,18 +706,18 @@ class KHSettings
     public function select1_html()
     {
         ?>
-<select name="cliowp_sp_select1">
-    <option value="1" <?php selected(get_option('cliowp_sp_select1'), '1'); ?>>
-        <?php esc_attr_e('Option1', 'khwpformsdb'); ?>
-    </option>
-    <option value="2" <?php selected(get_option('cliowp_sp_select1'), '2'); ?>>
-        <?php esc_attr_e('Option2', 'khwpformsdb'); ?>
-    </option>
-    <option value="3" <?php selected(get_option('cliowp_sp_select1'), '3'); ?>>
-        <?php esc_attr_e('Option3', 'khwpformsdb'); ?>
-    </option>
-</select>
-<?php
+        <select name="cliowp_sp_select1">
+            <option value="1" <?php selected(get_option('cliowp_sp_select1'), '1'); ?>>
+                <?php esc_attr_e('Option1', 'khwpformsdb'); ?>
+            </option>
+            <option value="2" <?php selected(get_option('cliowp_sp_select1'), '2'); ?>>
+                <?php esc_attr_e('Option2', 'khwpformsdb'); ?>
+            </option>
+            <option value="3" <?php selected(get_option('cliowp_sp_select1'), '3'); ?>>
+                <?php esc_attr_e('Option3', 'khwpformsdb'); ?>
+            </option>
+        </select>
+        <?php
     }
 
     /**
@@ -759,9 +745,8 @@ class KHSettings
     public function checkbox1_html()
     {
         ?>
-<input class="form-control " type="checkbox" name="Enable_data_saving_checkbox" value="1"
-    <?php checked(get_option('Enable_data_saving_checkbox'), '1'); ?>>
-<?php
+        <input class="form-control " type="checkbox" name="Enable_data_saving_checkbox" value="1" <?php checked(get_option('Enable_data_saving_checkbox'), '1'); ?>>
+        <?php
     }
 
     /**
@@ -770,23 +755,9 @@ class KHSettings
     public function checkbox2_html()
     {
         ?>
-<input class="my-custom-checkbox" type="checkbox" name="Enable_notification_checkbox" value="1"
-    <?php checked(get_option('Enable_notification_checkbox'), '1'); ?>>
-<?php
+        <input class="my-custom-checkbox" type="checkbox" name="Enable_notification_checkbox" value="1" <?php checked(get_option('Enable_notification_checkbox'), '1'); ?>>
+        <?php
     }
-
-    /**
-     * Create HTML for Notification checkbox field
-     */
-    public function number_page_html()
-    {
-
-        $numberperpage = get_option('number_id_setting');
-
-        echo '<input class="form-control " type="text" name="number_id_setting" value="' . esc_attr($numberperpage) . '" />';
-    }
-
-
 
     /**
      * Create HTML for multiselect1 field
@@ -802,16 +773,16 @@ class KHSettings
             $selected_values = get_option('form_id_setting');
             ?>
 
-<?php
+            <?php
             //esc_attr_e('<h1><</h1>', 'khwpformsdb');
             $message = sprintf(esc_html__('To select multiple IDs, press and hold the Ctrl button while selecting IDs.'));
             $html_message = sprintf('<div class="information-text">%s</div>', wpautop($message));
             echo wp_kses_post($html_message); ?>
 
-</option>
+            </option>
 
-<select name="form_id_setting[]" multiple>
-    <?php
+            <select name="form_id_setting[]" multiple>
+                <?php
                 foreach ($results_formids as $form_id) {
                     //error_log(print_r($form_id, true));
                     $option_value = esc_attr($form_id->form_id);
@@ -820,9 +791,9 @@ class KHSettings
                 Form ID: $option_value</option>";
                 }
                 ?>
-</select>
+            </select>
 
-<?php } else {
+        <?php } else {
 
             /* translators: %s: PHP version */
             $message = sprintf(esc_html__('Currently, no data has been submitted. Kindly submit at least one form.'));
@@ -857,9 +828,9 @@ class KHSettings
     public function textarea1_html(array $args)
     {
         ?>
-<textarea name="cliowp_sp_textarea1" rows="<?php echo esc_html($args['rows']); ?>"
-    cols="<?php echo esc_html($args['cols']); ?>"><?php echo esc_attr(get_option('cliowp_sp_textarea1')); ?></textarea>
-<?php
+        <textarea name="cliowp_sp_textarea1" rows="<?php echo esc_html($args['rows']); ?>"
+            cols="<?php echo esc_html($args['cols']); ?>"><?php echo esc_attr(get_option('cliowp_sp_textarea1')); ?></textarea>
+        <?php
     }
 
     /**
@@ -868,8 +839,8 @@ class KHSettings
     public function color1_html()
     {
         ?>
-<input type="color" name="khwpforms_bg_color" value="<?php echo esc_attr(get_option('khwpforms_bg_color')); ?>">
-<?php
+        <input type="color" name="khwpforms_bg_color" value="<?php echo esc_attr(get_option('khwpforms_bg_color')); ?>">
+        <?php
     }
 
     /**
@@ -878,8 +849,8 @@ class KHSettings
     public function color_html2()
     {
         ?>
-<input type="color" name="khwpforms_text_color" value="<?php echo esc_attr(get_option('khwpforms_text_color')); ?>">
-<?php
+        <input type="color" name="khwpforms_text_color" value="<?php echo esc_attr(get_option('khwpforms_text_color')); ?>">
+        <?php
     }
 
     /**
@@ -888,8 +859,8 @@ class KHSettings
     public function color_html3()
     {
         ?>
-<input type="color" name="khwpforms_label_color" value="<?php echo esc_attr(get_option('khwpforms_label_color')); ?>">
-<?php
+        <input type="color" name="khwpforms_label_color" value="<?php echo esc_attr(get_option('khwpforms_label_color')); ?>">
+        <?php
     }
 
     /**
@@ -898,9 +869,9 @@ class KHSettings
     public function color_exportbg_html()
     {
         ?>
-<input type="color" name="khwpforms_exportbg_color"
-    value="<?php echo esc_attr(get_option('khwpforms_exportbg_color')); ?>">
-<?php
+        <input type="color" name="khwpforms_exportbg_color"
+            value="<?php echo esc_attr(get_option('khwpforms_exportbg_color')); ?>">
+        <?php
     }
 
     /**
@@ -921,20 +892,20 @@ class KHSettings
     {
         ?>
 
-<div class="wrap">
-    <h1>
-        <?php echo esc_attr($this->page_title); ?>
-    </h1>
-    <form action="<?php echo esc_attr($this->form_action); ?>" method="POST">
-        <?php
+        <div class="wrap">
+            <h1>
+                <?php echo esc_attr($this->page_title); ?>
+            </h1>
+            <form action="<?php echo esc_attr($this->form_action); ?>" method="POST">
+                <?php
                 settings_fields($this->option_group);
                 do_settings_sections($this->menu_slug);
                 submit_button();
                 ?>
-    </form>
-</div>
+            </form>
+        </div>
 
-<?php
+        <?php
     }
 
     /**
