@@ -100,7 +100,7 @@ class KHSettings
         ) {
             add_action('admin_notices', array($this, 'custom_success_notice'));
 
-            error_log('wpform is_plugin_active  is active');
+            //error_log('wpform is_plugin_active  is active');
         } else {
             error_log('wpform is_plugin_active  is  not active');
             add_action('admin_notices', array($this, 'wpforms_admin_notice'));
@@ -318,6 +318,20 @@ class KHSettings
         register_setting(
             $this->option_group,
             'form_id_setting',
+        );
+
+        // Number of entries in page --------------------------------------------------.
+        add_settings_field(
+            'number_id_setting',
+            __('<span class="label_setting">Number of entries per Page', 'khwpformsdb'),
+            array($this, 'number_page_html'),
+            $this->menu_slug,
+            'cliowp_settings_page_section1'
+        );
+
+        register_setting(
+            $this->option_group,
+            'number_id_setting',
         );
 
         //Telegram token field
@@ -760,6 +774,19 @@ class KHSettings
     <?php checked(get_option('Enable_notification_checkbox'), '1'); ?>>
 <?php
     }
+
+    /**
+     * Create HTML for Notification checkbox field
+     */
+    public function number_page_html()
+    {
+
+        $numberperpage = get_option('number_id_setting');
+
+        echo '<input class="form-control " type="text" name="number_id_setting" value="' . esc_attr($numberperpage) . '" />';
+    }
+
+
 
     /**
      * Create HTML for multiselect1 field

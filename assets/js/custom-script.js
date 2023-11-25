@@ -70,7 +70,7 @@ jQuery(document).ready(function ($) {
     });
   });
 
-  $(".edit-btn").on("click", function () {
+  $(".edit-btn, .editbtn").on("click", function () {
     var form_id = $(this).data("form-id");
     var id = $(this).data("id");
     console.log("Form ID:", form_id);
@@ -169,7 +169,7 @@ jQuery(document).ready(function ($) {
     window.location.href = custom_vars.ajax_url + "?" + $.param(data);
   });
 
-  $(".delete-btn").on("click", function () {
+  $(".delete-btn, .deletebtn").on("click", function () {
     var form_id = $(this).data("form-id");
     var id = $(this).data("form-id");
     var nonce = $(this).data("nonce");
