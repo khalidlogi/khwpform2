@@ -106,3 +106,18 @@ primary {
 .my-settings-label i.fas.fa-info-circle:hover::after {
   display: block;
 }
+
+.view-option-label {
+  display: inline-block;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.view-option-label img {
+  border: 2px dotted transparent;
+  transition: border-color 0.3s;
+}
+
+.view-option-label input[type="radio"]:checked + img {
+  border-color: blue;
+}

@@ -784,13 +784,16 @@ class KHSettings
         $table_view_selected = ($selected_option === 'table') ? 'checked' : '';
         $normal_view_selected = ($selected_option === 'normal') ? 'checked' : '';
         ?>
-        <label>
+        <style>
+
+        </style>
+        <label class="view-option-label">
             <input type="radio" name="view_option" value="table" <?php echo $table_view_selected; ?>>
-            <img width="220" src="<?php echo plugins_url('/assets/img/tableview.png', dirname(__FILE__)); ?>" alt="Table View">
+            <img width="220" src="<?php echo plugins_url('/assets/img/table.png', dirname(__FILE__)); ?>" alt="Table View">
         </label>
-        <label>
+        <label class="view-option-label">
             <input type="radio" name="view_option" value="normal" <?php echo $normal_view_selected; ?>>
-            <img width="220" src="<?php echo plugins_url('/assets/img/tableview.png', dirname(__FILE__)); ?>" alt="Table View">
+            <img width="220" src="<?php echo plugins_url('/assets/img/normal.png', dirname(__FILE__)); ?>" alt="Table View">
         </label>
         <?php
     }

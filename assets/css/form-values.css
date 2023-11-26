@@ -235,7 +235,7 @@ button.dismiss-btn {
 }
 
 .pagination-links {
-  margin-top: 10px; /* Adjust the top margin as needed */
+  margin: 7px 0px;
 }
 
 .pagination-links a {
