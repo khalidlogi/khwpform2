@@ -657,7 +657,7 @@ if (!class_exists('KHMYCLASS')) {
                             echo '</div>';
                         }
 
-                        //Pagination link
+                        echo '<div class="pagination-links">';
                         echo paginate_links(
                             array(
                                 'base' => esc_url(add_query_arg('paged', '%#%')),
@@ -668,6 +668,7 @@ if (!class_exists('KHMYCLASS')) {
                                 'current' => $current_page,
                             )
                         );
+                        echo '</div>';
 
                         echo '<br>';
                         echo '<button style="background:' . $this->exportbgcolor . ';" class="export-btn"><i class="fas fa-download"></i> Export as CSV</button>';

@@ -233,3 +233,21 @@ button.dismiss-btn {
   cursor: pointer;
   transition: color 0.3s ease;
 }
+
+.pagination-links {
+  margin-top: 10px; /* Adjust the top margin as needed */
+}
+
+.pagination-links a {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #eaeaea;
+  color: #333;
+  text-decoration: none;
+  border: 1px solid #ccc;
+  margin-right: 5px; /* Adjust the right margin between links as needed */
+}
+
+.pagination-links a:hover {
+  background-color: #ccc;
+}
