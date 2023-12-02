@@ -1,7 +1,7 @@
 <?php
 
 /*
-Plugin Name: Adas_Wpforms_Database_Add-On 
+Plugin Name: Adas Wpforms Database Add-On 
 Description: Enhance WPForms with a powerful database feature for effortless storage and organization of form submissions.
 Version: 1.0
 Author: Khalidlogi
@@ -10,18 +10,21 @@ Text Domain: adas
 */
 
 // to do 
+//Add display my form by logged in user
+https: //demo.formviewswp.com/?utm_source=wordpress-plugin-repo&amp%3Butm_medium=wpforms-views&amp%3Butm_campaign=wpforms-views-lite-version
+
 // if fiels admin exist, skip admin field 
 // remove ini_set('display_errors', 1);
+// remove alert
 
-if (!defined('ABSPATH')) {
+if(!defined('ABSPATH')) {
     exit;
 }
 //error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-if (!class_exists('KHMYCLASS')) {
-    class KHMYCLASS
-    {
+if(!class_exists('KHMYCLASS')) {
+    class KHMYCLASS {
         /**
          * Plugin version for enqueueing, etc.
          *
@@ -43,11 +46,12 @@ if (!class_exists('KHMYCLASS')) {
         private $isdataenabled;
         private $isnotif;
 
-        public function __construct()
-        {
+        public function __construct() {
             // Setup and initialization
             $this->setup_constants();
             $this->includes();
+
+            // Instantiate Datamanagmnet class and settings class
             $this->mydb = new KHdb();
             $this->mysetts = new KHSettings();
 
@@ -55,26 +59,24 @@ if (!class_exists('KHMYCLASS')) {
             $this->regsiter_hooks();
 
             // Activate if enabled
-            if ($this->isdataenabled === '1') {
+            $this->isdataenabled = get_option('Enable_data_saving_checkbox');
+            if($this->isdataenabled === '1') {
                 add_action('wpforms_process_entry_save', array($this, 'process_entry'), 10, 4);
             }
 
+            // Redirect back after logged in
             add_action('wp_login', array($this, 'redirect_to_saved_url'));
-
-
-
 
         }
 
 
         // Redirect users to the saved URL upon login
-        function redirect_to_saved_url()
-        {
+        function redirect_to_saved_url() {
             $saved_url = get_option('saved_url');
-            if (!empty($saved_url)) {
+            if(!empty($saved_url)) {
                 $redirect_param = isset($_GET['redirect']) ? $_GET['redirect'] : '';
                 $paged_param = isset($_GET['paged']) ? $_GET['paged'] : ''; // Check for 'paged' parameter
-                if ($redirect_param === 'specific_value' && empty($paged_param)) {
+                if($redirect_param === 'specific_value' && empty($paged_param)) {
                     delete_option('saved_url');
                     wp_redirect($saved_url);
                     exit;
@@ -83,24 +85,21 @@ if (!class_exists('KHMYCLASS')) {
         }
 
         /* Translation */
-        public function kh_wpfdb_load_textdomain()
-        {
-            load_plugin_textdomain(TABLESOME_DOMAIN, false, basename(dirname(__FILE__)) . '/languages');
+        public function kh_wpfdb_load_textdomain() {
+            load_plugin_textdomain(TABLESOME_DOMAIN, false, basename(dirname(__FILE__)).'/languages');
         }
 
 
 
-        public function kh_wpfdb_activation()
-        {
-            if (!version_compare(PHP_VERSION, '5.4', '>=')) {
+        public function kh_wpfdb_activation() {
+            if(!version_compare(PHP_VERSION, '5.4', '>=')) {
                 add_action('admin_notices', array($this, 'kh_wpfdb_fail_php_version'));
-            } elseif (!version_compare(get_bloginfo('version'), '4.5', '>=')) {
+            } elseif(!version_compare(get_bloginfo('version'), '4.5', '>=')) {
                 add_action('admin_notices', array($this, 'kh_wpfdb_fail_wp_version'));
             }
         }
 
-        public function kh_wpfdb_fail_php_version()
-        {
+        public function kh_wpfdb_fail_php_version() {
             /* translators: %s: PHP version */
             $message = sprintf(esc_html__('kh_wpforms_db plugin requires PHP version %s+, plugin may not work properly.', 'khwpformsdb'), '5.4');
             $html_message = sprintf('<div class="error">%s</div>', wpautop($message));
@@ -112,8 +111,7 @@ if (!class_exists('KHMYCLASS')) {
          * @since 1.5.0
          * @return void
          */
-        public function kh_wpfdb_fail_wp_version()
-        {
+        public function kh_wpfdb_fail_wp_version() {
             /* translators: %s: WP version */
             $message = sprintf(esc_html__('kh_wpforms_db plugin requires WordPress version %s+. Because you are using an earlier version, the plugin may not work properly.', 'khwpformsdb'), '4.5');
             $html_message = sprintf('<div class="error">%s</div>', wpautop($message));
@@ -124,21 +122,18 @@ if (!class_exists('KHMYCLASS')) {
         /**
          * Include all the necessary files
          */
-        private function includes()
-        {
-            include_once KHFORM_PATH . 'Inc/KHTelegram.php';
-            include_once KHFORM_PATH . 'Inc/KHCSV.php';
-            include_once KHFORM_PATH . 'Inc/KHSettings.php';
-            include_once KHFORM_PATH . 'Inc/KHPDF.php';
-            include_once KHFORM_PATH . 'Inc/KHdb.php';
-            include_once KHFORM_PATH . 'Inc/AjaxClass.php';
-            include_once KHFORM_PATH . 'Inc/KHwidget.php';
-            include_once KHFORM_PATH . 'Inc/display_form_values_shortcode.php';
-            include_once KHFORM_PATH . 'Inc/EnqueueClass.php';
+        private function includes() {
+            include_once KHFORM_PATH.'Inc/KHTelegram.php';
+            include_once KHFORM_PATH.'Inc/KHCSV.php';
+            include_once KHFORM_PATH.'Inc/KHSettings.php';
+            include_once KHFORM_PATH.'Inc/KHPDF.php';
+            include_once KHFORM_PATH.'Inc/KHdb.php';
+            include_once KHFORM_PATH.'Inc/AjaxClass.php';
+            include_once KHFORM_PATH.'Inc/KHwidget.php';
+            include_once KHFORM_PATH.'Inc/display_form_values_shortcode.php';
+            include_once KHFORM_PATH.'Inc/EnqueueClass.php';
 
         }
-
-
 
 
         /**
@@ -146,22 +141,22 @@ if (!class_exists('KHMYCLASS')) {
          *
          * @since 1.0.0
          */
-        private function setup_constants()
-        {
+        private function setup_constants() {
 
             global $wpdb;
+            $this->table_name = $wpdb->prefix.'wpforms_db2';
 
             // Plugin version.
-            if (!defined('KHFORM_DOMAIN')) {
+            if(!defined('KHFORM_DOMAIN')) {
                 define('KHFORM_DOMAIN', 'khwpformsdb');
             }
             // Plugin version.
-            if (!defined('KHFORM_VERSION')) {
+            if(!defined('KHFORM_VERSION')) {
                 define('KHFORM_VERSION', $this->version);
             }
 
             // Plugin Folder Path.
-            if (!defined('KHFORM_PATH')) {
+            if(!defined('KHFORM_PATH')) {
                 define('KHFORM_PATH', plugin_dir_path(__FILE__));
             }
 
@@ -170,8 +165,7 @@ if (!class_exists('KHMYCLASS')) {
                 define('KHFORM_URL', plugin_dir_url(__FILE__));
             }*/
 
-            //table name wpforms_db2
-            $this->table_name = $wpdb->prefix . 'wpforms_db2';
+
 
         }
 
@@ -179,28 +173,16 @@ if (!class_exists('KHMYCLASS')) {
          * function to create table
          *
          */
-        public function create_table()
-        {
+        public function create_table() {
             global $wpdb;
             $this->mydb->create_tabledb();
         }
 
-        /**
-         * Delete wpforms_db2 table on plugin deactivation
-         *
-         */
-        public function deactivate()
-        {
-            global $wpdb;
-            // $this->mydb->delete_tabledb();
-        }
 
         /**
          * Plugin activation hook callback function.
          */
-        public function activate()
-        {
-            global $wp_version;
+        public function activate() {
             $this->kh_wpfdb_activation();
             // Create the table on plugin activation
             $this->create_table();
@@ -211,8 +193,7 @@ if (!class_exists('KHMYCLASS')) {
          *
          * @return void
          */
-        function update_form_values()
-        {
+        function update_form_values() {
 
             global $wpdb;
 
@@ -225,19 +206,19 @@ if (!class_exists('KHMYCLASS')) {
             parse_str($form_data, $fields);
 
 
-            if (!$id) {
+            if(!$id) {
                 wp_send_json_error('Invalid ID');
                 exit;
             }
 
             // Check permissions
-            if (!current_user_can('delete_posts')) {
+            if(!current_user_can('delete_posts')) {
                 wp_send_json_error('Insufficient permissions');
                 exit;
             }
 
             // Check for nonce security      
-            if (!wp_verify_nonce($_POST['nonceupdate'], 'nonceupdate')) {
+            if(!wp_verify_nonce($_POST['nonceupdate'], 'nonceupdate')) {
                 die('Busted!');
             }
 
@@ -247,7 +228,7 @@ if (!class_exists('KHMYCLASS')) {
                 array('id' => $id)
             );
 
-            if ($status === false) {
+            if($status === false) {
                 // An error occurred, send an error response
                 $error_message = $wpdb->last_error;
                 wp_send_json_error(array('message' => $error_message));
@@ -265,8 +246,7 @@ if (!class_exists('KHMYCLASS')) {
          * @return  array $fields
          *
          */
-        function get_form_values()
-        {
+        function get_form_values() {
             global $wpdb;
 
             $form_id = intval($_POST['form_id']);
@@ -276,16 +256,16 @@ if (!class_exists('KHMYCLASS')) {
             $query = $wpdb->prepare("SELECT id, form_value FROM $this->table_name WHERE id = %d", $id);
             $serialized_data = $wpdb->get_results($query);
 
-            if ($wpdb->last_error) {
-                wp_send_json_error('Error: ' . $wpdb->last_error);
+            if($wpdb->last_error) {
+                wp_send_json_error('Error: '.$wpdb->last_error);
             }
 
-            if ($serialized_data) {
+            if($serialized_data) {
                 // Unserialize the serialized form value
                 $unserialized_data = unserialize($serialized_data[0]->form_value);
                 $fields = array();
 
-                foreach ($unserialized_data as $key => $value) {
+                foreach($unserialized_data as $key => $value) {
                     $fields[] = array(
                         'name' => $key,
                         'value' => $value
@@ -300,71 +280,35 @@ if (!class_exists('KHMYCLASS')) {
 
 
         /**
-         * delete form row by its id
-         */
-        function delete_form_row()
-        {
-            global $wpdb;
-
-            $id = intval($_POST['form_id']);
-
-            if (!$id) {
-                wp_send_json_error('Invalid ID');
-                exit;
-            }
-
-            // Check permissions
-            if (!current_user_can('delete_posts')) {
-                wp_send_json_error('Insufficient permissions');
-                exit;
-            }
-
-            // Check for nonce security      
-            if (!wp_verify_nonce($_POST['nonce'], 'ajax-nonce')) {
-                die('Busted!');
-            }
-
-            $this->mydb->delete_data($id);
-            if (!$wpdb->delete()) {
-                wp_send_json_error('Error deleting');
-                exit;
-
-            }
-            wp_send_json_success('deleted successfully');
-            exit;
-
-        }
-
-
-        /**
          * Function to insert data into database
          * @return void
          */
-        function process_entry($fields, $entry, $form_data, $entry_id)
-        {
+        function process_entry($fields, $entry, $form_data, $entry_id) {
 
 
             global $wpdb;
 
-            $current_url = get_permalink();
+            error_log(' function process_entry');
 
+            //save permalink for redirect purposes
+            $current_url = get_permalink();
             update_option('saved_url', $current_url);
 
-            error_log('process_entry activated');
+            //error_log('process_entry activated');
             // Obviously we need to have form fields to proceed.
-            if (empty($fields)) {
+            if(empty($fields)) {
                 return;
             }
 
-            $now = new DateTime($entry->date);
-            error_log(print_r($entry), true);
-            error_log(print_r($now, true));
+            //$now = new DateTime($entry->date);
+            //error_log(print_r($entry), true);
+            //error_log(print_r($now, true));
 
             $form_date = current_time('Y-m-d H:i:s');
 
-            if ($fields) {
+            if($fields) {
 
-                foreach ($fields as $field) {
+                foreach($fields as $field) {
                     $name = sanitize_text_field($field['name']); // Sanitize field name
                     $value = is_array($field['value']) ? serialize($field['value']) : $field['value'];
 
@@ -376,7 +320,7 @@ if (!class_exists('KHMYCLASS')) {
 
             // insert data into table
             $wpdb->insert(
-                $wpdb->prefix . 'wpforms_db2',
+                $wpdb->prefix.'wpforms_db2',
                 // table name
                 array(
                     //'email' => $email,
@@ -394,7 +338,7 @@ if (!class_exists('KHMYCLASS')) {
             );
 
             //send telegram notifications
-            if ($this->isnotif === '1') {
+            if($this->isnotif === '1') {
                 $telegram = new KHTelegram();
                 error_log(print_r($serialized_data, true));
                 // Create the message text
@@ -409,8 +353,7 @@ if (!class_exists('KHMYCLASS')) {
          *
          * @return void
          */
-        function regsiter_hooks()
-        {
+        function regsiter_hooks() {
             register_activation_hook(__FILE__, array($this, 'activate'));
             register_deactivation_hook(__FILE__, array($this, 'deactivate'));
 
@@ -418,7 +361,7 @@ if (!class_exists('KHMYCLASS')) {
     }
 }
 
-if (class_exists('KHMYCLASS')) {
+if(class_exists('KHMYCLASS')) {
     new KHMYCLASS();
     new KHCSV();
     new KHPDF();

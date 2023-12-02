@@ -1,21 +1,19 @@
 <?php
 
 
-if (!defined('ABSPATH')) {
+if(!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
 
-class KHdb
-{
+class KHdb {
 
     protected $table_name;
     private $formid;
     private static $instance;
-    public function __construct()
-    {
+    public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'wpforms_db2';
+        $this->table_name = $wpdb->prefix.'wpforms_db2';
         $this->formid = $this->retrieve_form_id();
         //$this->count_items();
     }
@@ -25,17 +23,16 @@ class KHdb
      *
      * @return bool
      */
-    public function delete_tabledb()
-    {
+    public function delete_tabledb() {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . $this->table_name;
+        $table_name = $wpdb->prefix.$this->table_name;
 
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+        if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
             // The table exists, let's drop it
             $sql = "DROP TABLE $table_name;";
 
-            if ($wpdb->query($sql) !== false) {
+            if($wpdb->query($sql) !== false) {
                 // Table dropped successfully
                 return true;
             } else {
@@ -54,13 +51,12 @@ class KHdb
      *
      * @return Array
      */
-    public function create_tabledb()
-    {
+    public function create_tabledb() {
         global $wpdb;
 
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS " . $this->table_name . " (
+        $sql = "CREATE TABLE IF NOT EXISTS ".$this->table_name." (
                 id bigint(20) NOT NULL AUTO_INCREMENT,
                 form_id INT(11) NOT NULL,
                 form_date DATETIME NOT NULL,
@@ -68,12 +64,11 @@ class KHdb
                 PRIMARY KEY (id)
             ) $charset_collate;";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require_once(ABSPATH.'wp-admin/includes/upgrade.php');
         dbDelta($sql);
     }
 
-    function delete_data($id)
-    {
+    function delete_data($id) {
         global $wpdb;
         // Delete the row with the specified form_id
         $wpdb->delete($this->table_name, array('id' => $id));
@@ -89,8 +84,7 @@ class KHdb
      *
      * @return int The number of items in the database table.
      */
-    public function count_items($formid = null)
-    {
+    public function count_items($formid = null) {
         global $wpdb;
 
         // Initialize the count to zero.
@@ -99,7 +93,7 @@ class KHdb
         // Set the form ID to the provided value.
         $this->formid = $formid;
 
-        if ($formid === null) {
+        if($formid === null) {
             // Select all rows.
             $query = "SELECT COUNT(DISTINCT id) FROM {$this->table_name}";
         } else {
@@ -123,22 +117,21 @@ class KHdb
      *
      * @return bool True if the table is empty, false if it has data.
      */
-    function retrieve_form_id()
-    {
+    function retrieve_form_id() {
         $form_id_setting = get_option('form_id_setting');
 
-        if (is_array($form_id_setting)) {
+        if(is_array($form_id_setting)) {
             $form_ids = array();
 
-            foreach ($form_id_setting as $value) {
-                if (is_numeric($value)) {
+            foreach($form_id_setting as $value) {
+                if(is_numeric($value)) {
                     $form_ids[] = $value;
                 }
             }
 
             $concatenated_form_id = implode(' , ', $form_ids);
             return $concatenated_form_id;
-        } elseif (is_numeric($form_id_setting)) {
+        } elseif(is_numeric($form_id_setting)) {
             return $form_id_setting;
         }
         return NULL; // If no valid value found, return an empty string
@@ -150,15 +143,14 @@ class KHdb
      *
      * @return bool True if the table is empty, false if it has data.
      */
-    public static function get_last_three_dates()
-    {
+    public static function get_last_three_dates() {
         global $wpdb;
-        $table = $wpdb->prefix . 'wpforms_db2';
+        $table = $wpdb->prefix.'wpforms_db2';
         $query = "SELECT DISTINCT form_date FROM {$table} ORDER BY form_date DESC LIMIT 3";
         $results = $wpdb->get_results($query);
 
         $dates = array();
-        foreach ($results as $result) {
+        foreach($results as $result) {
             $dates[] = $result->form_date;
         }
 
@@ -172,13 +164,12 @@ class KHdb
      *
      * @return bool True if the table is empty, false if it has data.
      */
-    function is_table_empty()
-    {
+    function is_table_empty() {
         global $wpdb;
 
         $count = $wpdb->get_var("SELECT COUNT(*) FROM $this->table_name");
 
-        if ($count === '0') {
+        if($count === '0') {
             return true; // Table is empty
         } else {
             return false; // Table has data
@@ -189,8 +180,7 @@ class KHdb
     /**
      * Get the first and last date from the database.
      */
-    function getDate()
-    {
+    function getDate() {
         global $wpdb;
         $first_date_query = $wpdb->get_var("SELECT MIN(form_date) FROM $this->table_name");
         $last_date_query = $wpdb->get_var("SELECT MAX(form_date) FROM $this->table_name");
@@ -203,49 +193,55 @@ class KHdb
      *
      * @since 1.0.0
      */
-    public function retrieve_form_values($formid = '', $offset = '', $items_per = '')
-    {
+    public function retrieve_form_values($formid = '', $offset = '', $items_per = '', $LIMIT = '') {
 
         // $wpdb->get_results("SELECT * FROM $this->table_name LIMIT $offset, $items_per_page");
 
         global $wpdb;
 
-        if (!empty($items_per)) {
+
+
+        if(!empty($items_per)) {
             $items_per_page = $items_per;
         } else {
             $items_per_page = (get_option('number_id_setting')) ?: '10';
         }
 
         // Retrieve the 'form_value' column from the database
-        if (!empty($formid)) {
+        if(!empty($formid)) {
             $formid = sanitize_text_field($formid);
         } else {
             $formid = $this->retrieve_form_id();
-
         }
 
         //$wpdb->get_results("SELECT * FROM $this->table_name LIMIT $offset, $items_per_page");
         //error_log('Enable_data_saving_checkbox : ' . get_option('Enable_data_saving_checkbox'));
 
-        if (empty($items_per)) {
-            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ");
+        //check if there is a limit
+        if(!empty($LIMIT)) {
+            $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ORDER BY id DESC LIMIT $LIMIT");
         } else {
-            if ($formid === null) {
-                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  LIMIT  $offset, $items_per_page ");
+            if(empty($items_per)) {
+                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name ");
             } else {
-                $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id IN($formid) 
+                if($formid === null) {
+                    $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  ORDER BY id DESC LIMIT  $offset, $items_per_page ");
+                } else {
+                    $results = $wpdb->get_results("SELECT id, form_id, form_value FROM  $this->table_name  where form_id IN($formid) ORDER BY id DESC
                 LIMIT  $offset, $items_per_page");
+                }
             }
         }
 
-        if ($results === false) {
-            error_log("SQL Error: " . $wpdb->last_error);
+        //var_dump($results);
+        if($results === false) {
+            error_log("SQL Error: ".$wpdb->last_error);
             return false;
         }
 
         $form_values = array();
 
-        foreach ($results as $result) {
+        foreach($results as $result) {
             $serialized_data = $result->form_value;
             $form_id = $result->form_id;
             $id = $result->id;
@@ -272,8 +268,7 @@ class KHdb
      *
      * @since 1.0.0
      */
-    public function retrieve_form_values2()
-    {
+    public function retrieve_form_values2() {
         global $wpdb;
         $form_values = array();
 
@@ -282,12 +277,12 @@ class KHdb
         $results = $wpdb->get_results("SELECT id,form_id, form_value FROM $this->table_name");
 
 
-        if (!$results) {
-            error_log('get_results working KHdb class : ' . $wpdb->last_error);
+        if(!$results) {
+            error_log('get_results working KHdb class : '.$wpdb->last_error);
         }
 
 
-        foreach ($results as $result) {
+        foreach($results as $result) {
             $serialized_data = $result->form_value;
             $form_id = $result->form_id;
             $id = $result->id;
@@ -308,9 +303,8 @@ class KHdb
     }
 
     // Static method to get the instance of the class
-    public static function getInstance()
-    {
-        if (!isset(self::$instance)) {
+    public static function getInstance() {
+        if(!isset(self::$instance)) {
             self::$instance = new self();
         }
         return self::$instance;

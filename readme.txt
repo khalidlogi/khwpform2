@@ -20,6 +20,12 @@ The Adas Wpforms Database Add-on plugin is an add-on for WPForms that enhances i
 - **Admin Notes**: Add important notes or comments to form submissions for better data management and collaboration.
 - **Telegram notifications **: Activate Telegram notifications to receive real-time notifications for every form submission.
 - **Customisation **: Personalize the appearance of theVisualized data by adjusting color schemes and background colors through the settings page.
+- **WordPress widget designed to display the most recent saved entry along with its date and other related information.
+
+
+
+
+
 
 == Installation ==
 

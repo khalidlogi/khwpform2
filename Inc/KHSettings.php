@@ -1,19 +1,15 @@
 <?php
 
 // Exit if accessed directly.
-if (!defined('ABSPATH')) {
+if(!defined('ABSPATH')) {
     exit;
 }
 
 /**
  * ClioWP Settings Page plugin main class
  *
- * Before use this code in your own plugin:
- * - Change the text domain (khwpformsdb) to your own text domain
- * - Make the appropriate changes in parameters in the constructor
  */
-class KHSettings
-{
+class KHSettings {
 
     /**
      * Settings Page title.
@@ -60,11 +56,10 @@ class KHSettings
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         // parameters.
-        $this->page_title = esc_html__('Adas Wpforms Database Add-on', 'khwpformsdb');
-        $this->menu_title = esc_html__('Adas-Wpforms-Db-Addon', 'khwpformsdb');
+        $this->page_title = esc_html__('Adas Wpforms Database Add-on', 'adaswpformsdb');
+        $this->menu_title = esc_html__('Adas-Wpforms-Db-Addon', 'adaswpformsdb');
         $this->capability = 'manage_options';
         $this->menu_slug = 'khwplist.php';
 
@@ -73,12 +68,12 @@ class KHSettings
 
         $this->form_action = 'options.php';
 
-        $this->option_group = 'khwpformsdb_sp_plugin';
+        $this->option_group = 'adaswpformsdb_sp_plugin';
 
         // actions.
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'add_settings'));
-        add_action('init', array($this, 'load_languages'));
+        //add_action('init', array($this, 'load_languages'));
 
         $this->wpforms_notice();
 
@@ -87,29 +82,26 @@ class KHSettings
     /**
      * Checks if WPForms plugin is active and adds custom notices accordingly.
      */
-    public function wpforms_notice()
-    {
-        // Check if get_plugins() function exists. This is required on the front end of the
-        // site, since it is in a file that is normally only loaded in the admin.
-        if (!function_exists('get_plugins')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    public function wpforms_notice() {
+        // Check if get_plugins() function exists. This is required on the front end
+        if(!function_exists('get_plugins')) {
+            require_once ABSPATH.'wp-admin/includes/plugin.php';
         }
 
-        if (
+        if(
             is_plugin_active('wpforms-lite/wpforms.php') || is_plugin_active('wpforms/wpforms.php')
         ) {
             add_action('admin_notices', array($this, 'custom_success_notice'));
 
             //error_log('wpform is_plugin_active  is active');
         } else {
-            error_log('wpform is_plugin_active  is  not active');
+            //error_log('wpform is_plugin_active  is  not active');
             add_action('admin_notices', array($this, 'wpforms_admin_notice'));
 
         }
     }
 
-    function custom_success_notice()
-    {
+    function custom_success_notice() {
         ?>
         <div class="notice notice-success is-dismissible">
             <p>
@@ -122,8 +114,7 @@ class KHSettings
         </div>
         <?php
     }
-    function wpforms_admin_notice()
-    {
+    function wpforms_admin_notice() {
         ?>
         <div class="notice notice-error">
             <p>
@@ -133,8 +124,7 @@ class KHSettings
         <?php
     }
 
-    function khwpforms_settings_link($links_array)
-    {
+    function khwpforms_settings_link($links_array) {
         $Settings = '<a href="admin.php?page=khwplist.php">Settings</a>';
         array_unshift($links_array, $Settings);
         return $links_array;
@@ -144,8 +134,7 @@ class KHSettings
     /**
      * call back function for action link
      */
-    function wk_plugin_settings_link($links)
-    {
+    function wk_plugin_settings_link($links) {
 
         $forms_link = '<a href="admin.php?page=khwplist.php">WPForms Data DB</a>';
         array_unshift($links, $forms_link);
@@ -155,8 +144,7 @@ class KHSettings
     /**
      * Adds a submenu page to the Settings main menu.
      */
-    public function add_settings_page()
-    {
+    public function add_settings_page() {
         /**
          * Params for add_options_page
          *
@@ -180,8 +168,7 @@ class KHSettings
     /**
      * Compose settings
      */
-    public function add_settings()
-    {
+    public function add_settings() {
 
         // Define Sections ----------------------------------------------------.
 
@@ -205,14 +192,14 @@ class KHSettings
          */
         add_settings_section(
             'cliowp_settings_page_section1',
-            __('<span class="label_setting label-primary">Database settings', 'khwpformsdb'),
+            __('<span class="label_setting label-primary">Database settings', 'adaswpformsdb'),
             null,
             $this->menu_slug
         );
 
         add_settings_section(
             'cliowp_settings_page_section2',
-            __('<span class="label_setting label-primary">Telegrem notifications', 'khwpformsdb'),
+            __('<span class="label_setting label-primary">Telegrem notifications', 'adaswpformsdb'),
             null,
             $this->menu_slug
         );
@@ -252,7 +239,7 @@ class KHSettings
 
         /*add_settings_field(
            'cliowp_sp_input1',
-           esc_html__('Input1 Label', 'khwpformsdb'),
+           esc_html__('Input1 Label', 'adaswpformsdb'),
            array($this, 'input1_html'),
            $this->menu_slug,
            'cliowp_settings_page_section1'
@@ -291,7 +278,7 @@ class KHSettings
         // Telegram notification Enable/Disable Checkbox field -----------------------------------------------------.
         add_settings_field(
             'Enable_notification_checkbox',
-            __('<span class="label_setting">Enable/Disable Telegram notifications', 'khwpformsdb'),
+            __('<span class="label_setting">Enable/Disable Telegram notifications', 'adaswpformsdb'),
             array($this, 'checkbox2_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -309,7 +296,7 @@ class KHSettings
         // MultiSelect field --------------------------------------------------.
         add_settings_field(
             'form_id_setting',
-            __('<span class="label_setting">Wpforms\' Form id', 'khwpformsdb'),
+            __('<span class="label_setting">Wpforms\' Form id', 'adaswpformsdb'),
             array($this, 'multiselect1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -323,7 +310,7 @@ class KHSettings
         // Number of entries in page --------------------------------------------------.
         add_settings_field(
             'number_id_setting',
-            __('<span class="label_setting">Number of entries per Page', 'khwpformsdb'),
+            __('<span class="label_setting">Number of entries per Page', 'adaswpformsdb'),
             array($this, 'number_page_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -339,7 +326,7 @@ class KHSettings
             'telegram_token_setting',
             __('<span class="label_setting">Token  <i class="fas fa-info-circle" data-toggle="tooltip" 
             title="To obtain a bot token, you can reach out to the @BotFather bot on Telegram. 
-            Simply send the command /newbot and follow the instructions provided."></i></span>', 'khwpformsdb'),
+            Simply send the command /newbot and follow the instructions provided."></i></span>', 'adaswpformsdb'),
             array($this, 'input_token_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -361,7 +348,7 @@ class KHSettings
             Simply send the /getid command to get your personal chat ID. If you want to retrieve the group chat ID, 
             invite the bot to the group and use the /getgroupid command. Group IDs typically begin with a hyphen, 
             while supergroup IDs start with -100."
-            ></i>', 'khwpformsdb'),
+            ></i>', 'adaswpformsdb'),
             array($this, 'input_chatid_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -380,7 +367,7 @@ class KHSettings
         /* Date field ---------------------------------------------------------.
         add_settings_field(
             'cliowp_sp_date1',
-            esc_html__('Date1 Label', 'khwpformsdb'),
+            esc_html__('Date1 Label', 'adaswpformsdb'),
             array($this, 'date1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -397,7 +384,7 @@ class KHSettings
         /* DateTime field -----------------------------------------------------.
         add_settings_field(
             'cliowp_sp_datetime1',
-            esc_html__('Datetime1 Label', 'khwpformsdb'),
+            esc_html__('Datetime1 Label', 'adaswpformsdb'),
             array($this, 'datetime1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -414,7 +401,7 @@ class KHSettings
         /* Password field -----------------------------------------------------.
         add_settings_field(
             'cliowp_sp_password1',
-            esc_html__('Password1 Label', 'khwpformsdb'),
+            esc_html__('Password1 Label', 'adaswpformsdb'),
             array($this, 'password1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -431,7 +418,7 @@ class KHSettings
         // Number field -------------------------------------------------------.
         add_settings_field(
             'form_id_setting',
-            esc_html__('Form ID', 'khwpformsdb'),
+            esc_html__('Form ID', 'adaswpformsdb'),
             array($this, 'number1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1',
@@ -446,7 +433,7 @@ class KHSettings
         // Select field -------------------------------------------------------.
         add_settings_field(
             'form_id_setting',
-            esc_html__('Form ID', 'khwpformsdb'),
+            esc_html__('Form ID', 'adaswpformsdb'),
             array($this, 'select1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -464,7 +451,7 @@ class KHSettings
         // Checkbox field -----------------------------------------------------.
         add_settings_field(
             'Enable_data_saving_checkbox',
-            __('<span class="label_setting">Enable/Disable Data saving', 'khwpformsdb'),
+            __('<span class="label_setting">Enable/Disable Data saving', 'adaswpformsdb'),
             array($this, 'checkbox1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -482,7 +469,7 @@ class KHSettings
         // view 
         add_settings_field(
             'view_option',
-            __('<span class="label_setting">View Option', 'khwpformsdb'),
+            __('<span class="label_setting">View Option', 'adaswpformsdb'),
             array($this, 'view_option_html'),
             $this->menu_slug,
             'cliowp_settings_page_section1'
@@ -503,7 +490,7 @@ class KHSettings
         /*Textarea field -----------------------------------------------------.
         add_settings_field(
             'cliowp_sp_textarea1',
-            __('<span class="label_setting">Textarea1 Label', 'khwpformsdb'),
+            __('<span class="label_setting">Textarea1 Label', 'adaswpformsdb'),
             array($this, 'textarea1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2',
@@ -524,7 +511,7 @@ class KHSettings
         // Color field for wraper--------------------------------------------------------.
         add_settings_field(
             'khwpforms_bg_color',
-            __('<span class="label_setting">Background Color', 'khwpformsdb'),
+            __('<span class="label_setting">Background Color', 'adaswpformsdb'),
             array($this, 'color1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -538,7 +525,7 @@ class KHSettings
         // Color field for text--------------------------------------------------------.
         add_settings_field(
             'khwpforms_text_color',
-            __('<span class="label_setting">Text Color', 'khwpformsdb'),
+            __('<span class="label_setting">Text Color', 'adaswpformsdb'),
             array($this, 'color_html2'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -552,7 +539,7 @@ class KHSettings
         // Color field for label--------------------------------------------------------.
         add_settings_field(
             'khwpforms_label_color',
-            __('<span class="label_setting">Label Text Color', 'khwpformsdb'),
+            __('<span class="label_setting">Label Text Color', 'adaswpformsdb'),
             array($this, 'color_html3'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -566,7 +553,7 @@ class KHSettings
         // bg Color for export button --------------------------------------------------------.
         add_settings_field(
             'khwpforms_exportbg_color',
-            __('<span class="label_setting">Export button bg Color', 'khwpformsdb'),
+            __('<span class="label_setting">Export button bg Color', 'adaswpformsdb'),
             array($this, 'color_exportbg_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2'
@@ -580,7 +567,7 @@ class KHSettings
         /* WYSIWYG editor field -----------------------------------------------.
         add_settings_field(
             'cliowp_sp_editor1',
-            __('<span class="label_setting">Editor1 Label', 'khwpformsdb'),
+            __('<span class="label_setting">Editor1 Label', 'adaswpformsdb'),
             array($this, 'editor1_html'),
             $this->menu_slug,
             'cliowp_settings_page_section2',
@@ -599,20 +586,18 @@ class KHSettings
     /**
      * Create HTML for input1 field
      */
-    public function input_chatid_html()
-    {
+    public function input_chatid_html() {
         $chatId = get_option('telegram_chat_id_setting');
 
-        echo '<input class="form-control " type="text" name="telegram_chat_id_setting" value="' . esc_attr($chatId) . '" />';
+        echo '<input class="form-control " type="text" name="telegram_chat_id_setting" value="'.esc_attr($chatId).'" />';
     }
 
     /**
      * Create HTML for input1 field
      */
-    public function input_token_html()
-    {
+    public function input_token_html() {
         $token = get_option('telegram_token_setting');
-        echo '<input class="form-control" type="text" name="telegram_token_setting" value="' . esc_attr($token) . '" />';
+        echo '<input class="form-control" type="text" name="telegram_token_setting" value="'.esc_attr($token).'" />';
     }
 
     /**
@@ -629,13 +614,12 @@ class KHSettings
      *
      * @param string $input The input value.
      */
-    public function sanitize_input1($input)
-    {
-        if (true === empty(trim($input))) {
+    public function sanitize_input1($input) {
+        if(true === empty(trim($input))) {
             add_settings_error(
                 'cliowp_sp_input1',
                 'cliowp_sp_input1_error',
-                esc_html__('Input1 cannot be empty', 'khwpformsdb'),
+                esc_html__('Input1 cannot be empty', 'adaswpformsdb'),
             );
             return get_option('cliowp_sp_input1');
         }
@@ -646,8 +630,7 @@ class KHSettings
     /**
      * Create HTML for date1 field
      */
-    public function date1_html()
-    {
+    public function date1_html() {
         ?>
         <input type="date" name="cliowp_sp_date1" value="<?php echo esc_attr(get_option('cliowp_sp_date1')); ?>">
         <?php
@@ -656,8 +639,7 @@ class KHSettings
     /**
      * Create HTML for datetime1 field
      */
-    public function datetime1_html()
-    {
+    public function datetime1_html() {
         ?>
         <input type="datetime-local" name="cliowp_sp_datetime1"
             value="<?php echo esc_attr(get_option('cliowp_sp_datetime1')); ?>">
@@ -671,8 +653,7 @@ class KHSettings
      * (because a hash is stored and not that original value).
      * Check the wp_options table to view what is saved as a hash.
      */
-    public function password1_html()
-    {
+    public function password1_html() {
         ?>
         <input class="form-control " type="password" name="cliowp_sp_password1" value="">
         <?php
@@ -683,8 +664,7 @@ class KHSettings
      *
      * @param string $input The plain password.
      */
-    public function encrypt_password1($input)
-    {
+    public function encrypt_password1($input) {
 
         return wp_hash_password($input);
     }
@@ -694,18 +674,17 @@ class KHSettings
      *
      * @param array $args Arguments passed.
      */
-    function number1_html()
-    {
+    function number1_html() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wpforms_db2';
+        $table_name = $wpdb->prefix.'wpforms_db2';
         $results_formids = $wpdb->get_results("SELECT DISTINCT form_id FROM $table_name");
 
         $form_id = get_option('form_id_setting');
 
-        if (empty($results_formids)) {
+        if(empty($results_formids)) {
             printf(__('It appears that there are no form entries detected. Please add a form using the WPForms plugin and submit at least one form.'));
 
-            if (is_plugin_inactive('wpforms-lite/wpforms.php')) {
+            if(is_plugin_inactive('wpforms-lite/wpforms.php')) {
                 // The plugin is not activated
                 printf(' <br>Activate wpforms-lite plugin and try again');
             } else {
@@ -716,13 +695,13 @@ class KHSettings
             echo '<div class="form-field">';
             echo '<select  name="form_id_setting" id="form_id_setting">';
             // Initialize an empty array to store form_id values
-            foreach ($results_formids as $row) {
+            foreach($results_formids as $row) {
                 $selected = ($row->form_id == $form_id) ? 'selected' : '';
-                echo '<option value="' . esc_attr($row->form_id) . '" ' . $selected . '>' . esc_html($row->form_id) . '</option>';
+                echo '<option value="'.esc_attr($row->form_id).'" '.$selected.'>'.esc_html($row->form_id).'</option>';
 
             }
             $selected_all = ($form_id == '1') ? 'selected' : '';
-            echo '<option value="1" ' . $selected_all . '>All forms</option>';
+            echo '<option value="1" '.$selected_all.'>All forms</option>';
             echo '</select>';
             echo '</div>';
         }
@@ -732,18 +711,17 @@ class KHSettings
     /**
      * Create HTML for select1 field
      */
-    public function select1_html()
-    {
+    public function select1_html() {
         ?>
         <select name="cliowp_sp_select1">
             <option value="1" <?php selected(get_option('cliowp_sp_select1'), '1'); ?>>
-                <?php esc_attr_e('Option1', 'khwpformsdb'); ?>
+                <?php esc_attr_e('Option1', 'adaswpformsdb'); ?>
             </option>
             <option value="2" <?php selected(get_option('cliowp_sp_select1'), '2'); ?>>
-                <?php esc_attr_e('Option2', 'khwpformsdb'); ?>
+                <?php esc_attr_e('Option2', 'adaswpformsdb'); ?>
             </option>
             <option value="3" <?php selected(get_option('cliowp_sp_select1'), '3'); ?>>
-                <?php esc_attr_e('Option3', 'khwpformsdb'); ?>
+                <?php esc_attr_e('Option3', 'adaswpformsdb'); ?>
             </option>
         </select>
         <?php
@@ -754,14 +732,13 @@ class KHSettings
      *
      * @param string $input The selected value.
      */
-    public function sanitize_select1($input)
-    {
+    public function sanitize_select1($input) {
         $valid_input = array('1', '2', '3');
-        if (false === in_array($input, $valid_input, true)) {
+        if(false === in_array($input, $valid_input, true)) {
             add_settings_error(
                 'cliowp_sp_select1',
                 'cliowp_sp_select1_error',
-                esc_html__('Invalid option for Select1', 'khwpformsdb'),
+                esc_html__('Invalid option for Select1', 'adaswpformsdb'),
             );
             return get_option('cliowp_sp_select1');
         }
@@ -771,15 +748,13 @@ class KHSettings
     /**
      * Create HTML for checkbox1 field
      */
-    public function checkbox1_html()
-    {
+    public function checkbox1_html() {
         ?>
         <input class="form-control " type="checkbox" name="Enable_data_saving_checkbox" value="1" <?php checked(get_option('Enable_data_saving_checkbox'), '1'); ?>>
         <?php
     }
 
-    public function view_option_html()
-    {
+    public function view_option_html() {
         $selected_option = get_option('view_option');
         $table_view_selected = ($selected_option === 'table') ? 'checked' : '';
         $normal_view_selected = ($selected_option === 'normal') ? 'checked' : '';
@@ -801,8 +776,7 @@ class KHSettings
     /**
      * Create HTML for Notification checkbox field
      */
-    public function checkbox2_html()
-    {
+    public function checkbox2_html() {
         ?>
         <input class="my-custom-checkbox" type="checkbox" name="Enable_notification_checkbox" value="1" <?php checked(get_option('Enable_notification_checkbox'), '1'); ?>>
         <?php
@@ -811,12 +785,11 @@ class KHSettings
     /**
      * Create HTML for Notification checkbox field
      */
-    public function number_page_html()
-    {
+    public function number_page_html() {
 
         $numberperpage = get_option('number_id_setting');
 
-        echo '<input class="form-control " type="text" name="number_id_setting" value="' . esc_attr($numberperpage) . '" />';
+        echo '<input class="form-control " type="text" name="number_id_setting" value="'.esc_attr($numberperpage).'" />';
     }
 
 
@@ -824,19 +797,18 @@ class KHSettings
     /**
      * Create HTML for multiselect1 field
      */
-    public function multiselect1_html()
-    {
+    public function multiselect1_html() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wpforms_db2';
+        $table_name = $wpdb->prefix.'wpforms_db2';
         $results_formids = $wpdb->get_results("SELECT DISTINCT form_id FROM $table_name");
         //error_log(print_r($results_formids, true));
 
-        if (count($results_formids) > 0) {
+        if(count($results_formids) > 0) {
             $selected_values = get_option('form_id_setting');
             ?>
 
             <?php
-            //esc_attr_e('<h1><</h1>', 'khwpformsdb');
+            //esc_attr_e('<h1><</h1>', 'adaswpformsdb');
             $message = sprintf(esc_html__('To select multiple IDs, press and hold the Ctrl button while selecting IDs.'));
             $html_message = sprintf('<div class="information-text">%s</div>', wpautop($message));
             echo wp_kses_post($html_message); ?>
@@ -845,11 +817,11 @@ class KHSettings
 
             <select name="form_id_setting[]" multiple>
                 <?php
-                foreach ($results_formids as $form_id) {
+                foreach($results_formids as $form_id) {
                     //error_log(print_r($form_id, true));
                     $option_value = esc_attr($form_id->form_id);
                     // $selected = in_array($option_value, $selected_values) ? 'selected' : '';
-                    echo "<option value='" . esc_html($option_value) . "' " . esc_html($this->cliowp_multiselected($selected_values, $option_value)) . ">
+                    echo "<option value='".esc_html($option_value)."' ".esc_html($this->cliowp_multiselected($selected_values, $option_value)).">
                 Form ID: $option_value</option>";
                 }
                 ?>
@@ -873,9 +845,8 @@ class KHSettings
      *
      * @return string
      */
-    private function cliowp_multiselected($selected_values, string $current_value): string
-    {
-        if (is_array($selected_values) && in_array($current_value, $selected_values, true)) {
+    private function cliowp_multiselected($selected_values, string $current_value): string {
+        if(is_array($selected_values) && in_array($current_value, $selected_values, true)) {
             return 'selected';
         }
 
@@ -887,8 +858,7 @@ class KHSettings
      *
      * @param array $args Arguments passed.
      */
-    public function textarea1_html(array $args)
-    {
+    public function textarea1_html(array $args) {
         ?>
         <textarea name="cliowp_sp_textarea1" rows="<?php echo esc_html($args['rows']); ?>"
             cols="<?php echo esc_html($args['cols']); ?>"><?php echo esc_attr(get_option('cliowp_sp_textarea1')); ?></textarea>
@@ -898,8 +868,7 @@ class KHSettings
     /**
      * Create HTML for color1 field
      */
-    public function color1_html()
-    {
+    public function color1_html() {
         ?>
         <input type="color" name="khwpforms_bg_color" value="<?php echo esc_attr(get_option('khwpforms_bg_color')); ?>">
         <?php
@@ -908,8 +877,7 @@ class KHSettings
     /**
      * Create HTML for color1 field
      */
-    public function color_html2()
-    {
+    public function color_html2() {
         ?>
         <input type="color" name="khwpforms_text_color" value="<?php echo esc_attr(get_option('khwpforms_text_color')); ?>">
         <?php
@@ -918,8 +886,7 @@ class KHSettings
     /**
      * Create HTML for label color field
      */
-    public function color_html3()
-    {
+    public function color_html3() {
         ?>
         <input type="color" name="khwpforms_label_color" value="<?php echo esc_attr(get_option('khwpforms_label_color')); ?>">
         <?php
@@ -928,8 +895,7 @@ class KHSettings
     /**
      * Create HTML for label color field
      */
-    public function color_exportbg_html()
-    {
+    public function color_exportbg_html() {
         ?>
         <input type="color" name="khwpforms_exportbg_color"
             value="<?php echo esc_attr(get_option('khwpforms_exportbg_color')); ?>">
@@ -939,8 +905,7 @@ class KHSettings
     /**
      * Create HTML for editor1 field
      */
-    public function editor1_html()
-    {
+    public function editor1_html() {
         wp_editor(
             wp_kses_post(get_option('cliowp_sp_editor1')),
             'cliowp_sp_editor1',
@@ -950,8 +915,7 @@ class KHSettings
     /**
      * Create Settings Page HTML
      */
-    public function settings_page_html()
-    {
+    public function settings_page_html() {
         ?>
 
         <div class="wrap">
@@ -973,8 +937,7 @@ class KHSettings
     /**
      * Loads plugin's translated strings.
      */
-    public function load_languages()
-    {
+    public function load_languages() {
         /**
          * Params of load_plugin_textdomain
          *
@@ -986,9 +949,9 @@ class KHSettings
          * @return bool         True when textdomain is successfully loaded, false otherwise.
          */
         load_plugin_textdomain(
-            'khwpformsdb',
+            'adaswpformsdb',
             false,
-            dirname(plugin_basename(__FILE__)) . '/languages'
+            dirname(plugin_basename(__FILE__)).'/languages'
         );
     }
 }
