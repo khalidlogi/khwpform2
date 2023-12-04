@@ -1,0 +1,7 @@
+{
+  "require": {
+    "dompdf/dompdf": "^2.0",
+    "slatch/telegram-bot-client": "^0.1.0"
+  },
+  "config": {}
+}
